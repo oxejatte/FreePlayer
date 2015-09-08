@@ -1,0 +1,35 @@
+FreePlayer v1.0
+    - pierwsze wydanie
+
+FreePlayer v1.1
+    - poprawka procedury ładowania napisów
+
+FreePlayer v1.2
+    - dodana możliwość zmiany typu czcionki (przycisk:OK) - konfiguracja font.ini
+    - dodana możliwość zmiany koloru czcionki (przycisk:Blue) - konfiguracja color.ini
+
+FreePlayer v1.3
+    - dodana obsługa napisów TXT (mDVD,MPL2,TMP) - obsługa polskich znaków WIN1250
+
+FreePlayer v1.4
+    - drobne poprawki
+
+FreePlayer v1.5
+    - poprawka procedury ładowania napisów
+
+FreePlayer v1.6
+    - dodana możliwość sortowania listy plików wg nazwy lub daty
+
+FreePlayer v1.61 OpenPLI
+    - dodana możliwość regulacji grubości obramowania napisów (przycisk:0)
+    - dodana możliwość zmiany formatu video (przycisk:*)
+    - alternatywna detekcja fps-ffmpeg
+    - poprawka obsługi napisów
+    - inne drobne modyfikacje
+
+FreePlayer v1.62 OpenPLI
+    - dodana możliwość wyboru ścieżki audio
+
+FreePlayer v1.63 OpenPLI
+    - dodana możliwość wyboru biblioteki odtwarzania mediów
+	
