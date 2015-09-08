@@ -1,0 +1,6 @@
+
+1. przenieść literkę X przy wymiarach
+2. ukrywanie na starcie znaczków
+----3. nie pamieta połozenia
+4. tło pod napisami inteligentne
+6. przeniesc przyciski
