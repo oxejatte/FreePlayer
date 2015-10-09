@@ -1,1 +1,3 @@
-# Contains different versions/clones of FreePlayer
+# Contains AdvancedFreePlayer version
+# Thanks to : @freebox, @COoLoSER, @crash and ...
+# others who was improving this great player.

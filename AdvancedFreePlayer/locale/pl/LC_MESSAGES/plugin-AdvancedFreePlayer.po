@@ -1,0 +1,122 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: tuxbox-enigma 0.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-11-01 13:01+0000\n"
+"PO-Revision-Date: 2015-10-08 14:30+0100\n"
+"Last-Translator: \n"
+"Language-Team: j00zek\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: polish\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.5.5\n"
+
+msgid "About"
+msgstr "Informacje"
+
+msgid "DMnapi"
+msgstr "DMnapi"
+
+msgid ""
+"KEYMAP:\n"
+"up/down - position subtitle\n"
+"left/right - size subtitle\n"
+"channel up/down - seek+/- subtitle\n"
+"3/6/9 - seek+ 30sek/2min/5min movie\n"
+"1/4/7 - seek- 30sek/2min/5min movie\n"
+"red - play\n"
+"green - pause\n"
+"yellow - change type font\n"
+"blue - change color font\n"
+"text - show/hide subtitle\n"
+"menu - show about\n"
+"ok - infobar\n"
+"audio - change audio track\n"
+msgstr ""
+"INSTRUKCJA:\n"
+"góra/dół - pozycja napisów\n"
+"w prawo/w lewo - wielkość napisów\n"
+"channel góra/dół - korekta czasu napisów\n"
+"3/6/9 - przewiń do przodu 30sek/2min/5min\n"
+"1/4/7 - przewiń do tyłu 30sek/2min/5min\n"
+"czerwony - odtwarzaj\n"
+"zielony - pauza\n"
+"żółty - krój czcionki\n"
+"niebieski - zmień kolor napisów\n"
+"text - pokaż/ukryj napisy\n"
+"menu - informacje\n"
+"ok - infobar\n"
+"audio - wybierz ścieżkę dźwiękową\n"
+
+msgid "Play"
+msgstr "Odtwarzaj"
+
+msgid "Play movie with subtitles"
+msgstr "Odtwarzaj film z napisami"
+
+msgid "Please select movie and subtitle"
+msgstr "Wybierz film i napisy"
+
+msgid ""
+"Please select movie files !\n"
+"\n"
+msgstr ""
+"Wybierz plik z filmem !\n"
+"\n"
+
+msgid "Sort"
+msgstr "Sortuj"
+
+msgid "Config"
+msgstr "Konfiguracja"
+
+msgid "Movie: "
+msgstr "Film: "
+
+msgid "Subtitle: "
+msgstr "Napisy: "
+
+msgid "FileList font size (20-32):"
+msgstr "Wielkość czcionki na liście (20-32):"
+
+msgid "MultiFramework selection (sh4 only):"
+msgstr "Wersja MultiFramework (tylko sh4):"
+
+msgid "Error load subtitle !!!"
+msgstr "Błąd ładowania pliku z napisami !!!"
+
+msgid "No DMnapi"
+msgstr "Brak DMnapi"
+
+msgid "Sort by name"
+msgstr "Sortuj wg nazw"
+
+msgid "Sort by date"
+msgstr "Sortuj wg daty"
+
+msgid "Save"
+msgstr "Zapisz"
+
+msgid "Cancel"
+msgstr "Anuluj"
+
+msgid "Update"
+msgstr "Aktualizacja"
+
+msgid "Initial movies folder:"
+msgstr "Katalog startowy:"
+
+msgid "Stop playing entering AdvancedFreePlayer:"
+msgstr "Zatrzymaj TV przy starcie:"
+
+msgid "Remember last used folder:"
+msgstr "Pamiętaj ostatnio wybrany katalog"
+
+msgid "%s %s Config"
+msgstr "Konfiguracja %s %s"
+
+msgid "Select during start"
+msgstr "Wybór przy starcie odtwarzania"
