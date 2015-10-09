@@ -171,3 +171,13 @@ msgstr "Instalacja niepoprawna"
 
 msgid "Success: Restart system to use new plugin version"
 msgstr "Sukces: Zrestartuj system aby aktywować nową wersję wtyczki"
+
+msgid "Do you want to update plugin?"
+msgstr "Zaktualizować wtyczkę?"
+
+msgid ""
+"\n"
+"Use up/down arrows to scroll text. OK closes window"
+msgstr ""
+"\n"
+"Użyj strzałek góra/dół do przewinięcia tekstu. Klawisz OK zamyka okno."
