@@ -120,3 +120,54 @@ msgstr "Konfiguracja %s %s"
 
 msgid "Select during start"
 msgstr "Wybór przy starcie odtwarzania"
+
+msgid "Updating plugin"
+msgstr "Aktualizacja wtyczki"
+
+msgid "Required program 'curl' is not installed. Trying to install it via OPKG."
+msgstr "Wymagany program 'curl' jest niezainstalowany. Próbuję zainstalować przez OPKG"
+
+msgid "Required program 'curl' is not available. Please install it first manually."
+msgstr "Wymagany program 'curl' jest niedostępny. Zainstaluj go najpierw ręcznie"
+
+msgid "Checking installation mode..."
+msgstr "Sprawdzam tryb instalacji"
+
+msgid "AdvancedFreePlayer controlled by OPKG. Please use it for updates."
+msgstr "AdvancedFreePlayer kontrolowany przez OPKG. Aktualizacje tylko przez OPKG."
+
+msgid "Checking internet connection..."
+msgstr "Sprawdzam połączenie internetowe"
+
+msgid "github server unavailable, update impossible!!!"
+msgstr "Serwer github niedostępny, aktualizacja niedostępna"
+
+msgid "Downloading latest plugin version..."
+msgstr "Pobieram ostatnią wersję wtyczki"
+
+msgid "Archive downloaded improperly"
+msgstr "Archiwum pobrane niepoprawnie"
+
+msgid "No archive downloaded, check your curl version"
+msgstr "Nie pobrano archiwum, sprawdz wersję curl"
+
+msgid "Unpacking new version..."
+msgstr "Rozpakowuję nową wersję"
+
+msgid "Archive unpacked improperly"
+msgstr "Archiwum rozpakowane poprawnie"
+
+msgid "Latest version already installed"
+msgstr "Najnowsza wersja jest już zainstalowana"
+
+msgid "Installing new version..."
+msgstr "Instaluję nową wersję"
+
+msgid "github is always up-2-date"
+msgstr "github jest zawsze aktualny ;)"
+
+msgid "Installation incorrect!!!"
+msgstr "Instalacja niepoprawna"
+
+msgid "Success: Restart system to use new plugin version"
+msgstr "Sukces: Zrestartuj system aby aktywować nową wersję wtyczki"
