@@ -121,7 +121,7 @@ audio - change audio track\n\
     <widget source="session.CurrentService" render="Label" position="220,40" size="580,45" font="Regular;24" valign="center" halign="center" noWrap="1" backgroundColor="black" transparent="1">
       <convert type="ServiceName">Name</convert>
     </widget>
-    <widget name="progressBar" position="224,86" size="547,10" zPosition="4" pixmap="%s/pic/progress.png" transparent="1" />
+    <widget name="progressBar" position="224,86" size="557,10" zPosition="4" pixmap="%s/pic/progress.png" transparent="1" />
     <widget name="currTimeLabel" position="245,120" size="110,30" valign="left" halign="center" font="Regular; 26"  shadowColor="black" shadowOffset="-3,-3" transparent="1" foregroundColor="yellow" />
     <widget name="lengthTimeLabel" position="375,120" size="110,30" valign="left" halign="center" font="Regular; 26" shadowColor="black" shadowOffset="-3,-3" transparent="1" />
     <widget name="remainedLabel" position="485,120" size="110,30" valign="left" halign="center" font="Regular; 26" shadowColor="black" shadowOffset="-3,-3" transparent="1" foregroundColor="green" />
@@ -409,7 +409,7 @@ audio - change audio track\n\
                 s = self.convertTime(lCurrent)
                 if self.oldinfo != s:
                     self.oldinfo = s
-                    lTotal = self.GetCurrentLength()
+                    lTotal = self.GetCurrentLength() or 0
                     printDEBUG("lTotal=%d" % lTotal)
                     lRemaining = lTotal - lCurrent
                     printDEBUG("lRemaining=%d" % lRemaining)
