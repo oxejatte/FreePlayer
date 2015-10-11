@@ -17,7 +17,7 @@ if [ $? -gt 0 ]; then
 fi
 
 echo "_(Checking installation mode...)"
-if `opkg list-installed 2>/dev/null | tr '[:upper:]' '[:lower:]'| grep -q 'userskin'`;then
+if `opkg list-installed 2>/dev/null | tr '[:upper:]' '[:lower:]'| grep -q 'advancedfreeplayer'`;then
   echo "_(AdvancedFreePlayer controlled by OPKG. Please use it for updates.)"
   exit 0
 fi
@@ -56,16 +56,16 @@ fi
 rm -rf /tmp/AFP.tar.gz
 
 version=`ls /tmp/ | grep j00zek-FreePlayer-`
-if [ -f /usr/lib/enigma2/python/Plugins/Extensions/UserSkin/$version ];then
+if [ -f /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/$version ];then
   echo "_(Latest version already installed)"
   exit 0
 fi
 
 echo "_(Installing new version...)"
 if [ ! -e /DuckboxDisk ]; then
-  rm -rf /usr/lib/enigma2/python/Plugins/Extensions/UserSkin/j00zek-UserSkin-* 2>/dev/null
-  touch /tmp/$version/UserSkin/$version 2>/dev/null
-  cp -a /tmp/$version/UserSkin/* /usr/lib/enigma2/python/Plugins/Extensions/UserSkin/
+  rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/j00zek-FreePlayer-* 2>/dev/null
+  touch /tmp/$version/AdvancedFreePlayer/$version 2>/dev/null
+  cp -a /tmp/$version/AdvancedFreePlayer/* /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/
 else
   echo
   echo "_(github is always up-2-date)"
