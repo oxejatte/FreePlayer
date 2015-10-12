@@ -118,7 +118,7 @@ audio - change audio track\n\
 <screen name="AdvancedFreePlayer" position="0,0" size="1280,720" title="InfoBar" backgroundColor="transparent" flags="wfNoBorder">
     <!-- OSD -->
     <widget name="InfoBarBG" position="215,30" zPosition="-5" size="851,134" pixmap="%s/pic/infobar.png" /> 
-    <widget source="session.CurrentService" render="Label" position="220,40" size="580,45" font="Regular;24" valign="center" halign="center" noWrap="1" backgroundColor="black" transparent="1">
+    <widget source="session.CurrentService" render="Label" position="220,40" size="580,45" font="Regular;24" valign="center" noWrap="1" backgroundColor="black" transparent="1">
       <convert type="ServiceName">Name</convert>
     </widget>
     <widget name="progressBar" position="224,86" size="557,10" zPosition="4" pixmap="%s/pic/progress.png" transparent="1" />
@@ -130,9 +130,9 @@ audio - change audio track\n\
     <widget source="static_x" render="Label" font="Regular; 10" position="870,127" size="60,20" halign="center" transparent="1"/>
     <widget source="static_VideoHeight" render="Label" font="Regular; 20" position="870,138" size="60,20" halign="center"  foregroundColor="#00fffe9e" transparent="1"/>
     <!-- ICONS -->
+    <widget name="IsWidescreen_Icon" position="870,35" size="60,60" zPosition="1" alphatest="blend" />
     <widget name="Is_HD_Icon" position="935,35" size="60,60" zPosition="1" alphatest="blend" />
     <widget name="IsMultichannel_Icon" position="1000,35" size="60,60" zPosition="1" alphatest="blend" />
-    <widget name="IsWidescreen_Icon" position="870,35" size="60,60" zPosition="1" alphatest="blend" />
     <!-- SubTiles -->
     <widget name="fpSRT_1" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
     <widget name="fpSRT_2" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
@@ -205,24 +205,56 @@ audio - change audio track\n\
         self.hideOSDTimer.start(self.autoHideTime, True) # singleshot
 
         self.__event_tracker = ServiceEventTracker(screen=self, eventmap= {
-                                                      iPlayableService.evStart: self.__serviceStarted,
+                                                      iPlayableService.evStart: self.__evStart,
                                                       iPlayableService.evUpdatedInfo: self.__evUpdatedInfo,
+                                                      iPlayableService.evVideoSizeChanged: self.__serviceStarted,
                                                       })
 
-    def getIconPath(self, IconName):
+    def __serviceStarted(self):
+        printDEBUG('__serviceStarted >>>')
+        self.__UpdateIcons()
+        self.resumeLastPlayback()
+
+    def __evStart(self): #needed for openPLI PC
+        printDEBUG('__evStart >>>')
+        self.__UpdateIcons()
+
+    def __evUpdatedInfo(self):
+        printDEBUG('__evUpdatedInfo >>>')
+        self.__UpdateIcons()
+
+    def getIconPtr(self, IconName):
         if path.exists('%sicons/%s' % (SkinPath,IconName)):
             myPath = '%sicons/%s' % (SkinPath,IconName)
         else:
             myPath = '%spic/%s' % (PluginPath, IconName)
-        #printDEBUG(myPath)
-        return myPath
+        printDEBUG(myPath)
+        IconPtr = LoadPixmap(cached=True,path=myPath ) 
+        return IconPtr
 
-    def __evUpdatedInfo(self, systemcall=True):
-        if systemcall==True: printDEBUG('__evUpdatedInfo systemcall')
-        else: printDEBUG('__evUpdatedInfo started manually')
-        
+    def __UpdateIcons(self):
+        printDEBUG('__UpdateIcons >>>')
         service=self.session.nav.getCurrentService()
         if service is not None:
+            printDEBUG('__UpdateIcons service exists')
+            info=service.info()
+            height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
+            width = info and info.getInfo(iServiceInformation.sVideoWidth) or -1
+            printDEBUG('__UpdateIcons video size %dX%d' % (width,height))
+            if height > 719 : #set HD
+                self["Is_HD_Icon"].instance.setPixmap(self.getIconPtr('ico_hd_on.png') )
+            elif height > 0:
+                self["Is_HD_Icon"].instance.setPixmap(self.getIconPtr('ico_hd_off.png') )
+            
+            if height >0 and width>0:
+                self["static_VideoWidth"].setText(str(width))
+                self["static_x"].setText("X")
+                self["static_VideoHeight"].setText(str(height))
+                if width/float(height) >= 1.5:
+                    self["IsWidescreen_Icon"].instance.setPixmap(self.getIconPtr('ico_format_on.png') )
+                else:
+                    self["IsWidescreen_Icon"].instance.setPixmap(self.getIconPtr('ico_format_off.png') )
+
             audio = service.audioTracks()
             if audio:
                 n = audio.getNumberOfTracks()
@@ -231,34 +263,10 @@ audio - change audio track\n\
                     i = audio.getTrackInfo(x)
                     description = i.getDescription();
                     if description.find("AC3") != -1 or description.find("DTS") != -1:
-                        self["IsMultichannel_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_dolby_on.png') ))
+                        self["IsMultichannel_Icon"].instance.setPixmap(self.getIconPtr('ico_dolby_on.png') )
                     else:
-                        self["IsMultichannel_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_sound_off.png') ))
-                        
-    def __serviceStarted(self):
-        #self.__evUpdatedInfo(False)
-        
-        service=self.session.nav.getCurrentService()
-        if service is not None:
-            info=service.info()
-            height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
-            width = info and info.getInfo(iServiceInformation.sVideoWidth) or -1
-            if height > 719 : #set HD
-                self["Is_HD_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_hd_on.png') ))
-            else:
-                self["Is_HD_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_hd_off.png') ))
-            
-            if height >0 and width>0:
-                self["static_VideoWidth"].setText(str(width))
-                self["static_x"].setText("X")
-                self["static_VideoHeight"].setText(str(height))
-                if width/float(height) >= 1.5:
-                    self["IsWidescreen_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_format_on.png') ))
-                else:
-                    self["IsWidescreen_Icon"].instance.setPixmap(LoadPixmap(path=self.getIconPath('ico_format_off.png') ))
+                        self["IsMultichannel_Icon"].instance.setPixmap(self.getIconPtr('ico_sound_off.png') )
 
-            self.resumeLastPlayback()
-      
     def __onClose(self):
         if self.fontpos != self.fontpos_ or self.fontsize != self.fontsize_ or self.fonttype_nr != self.fonttype_nr_ \
         or self.fontcolor_nr != self.fontcolor_nr_ or self.osdPosX != self.osdPosX_ or self.osdPosY != self.osdPosY_ \
@@ -401,7 +409,7 @@ audio - change audio track\n\
 
     def timerEvent(self):
         lCurrent = self.GetCurrentPosition() or 0
-        printDEBUG("lCurrent=%d" % lCurrent)
+        #printDEBUG("lCurrent=%d" % lCurrent)
         if not lCurrent is None:
             self.showsubtitle(lCurrent)
 
@@ -410,9 +418,9 @@ audio - change audio track\n\
                 if self.oldinfo != s:
                     self.oldinfo = s
                     lTotal = self.GetCurrentLength() or 0
-                    printDEBUG("lTotal=%d" % lTotal)
+                    #printDEBUG("lTotal=%d" % lTotal)
                     lRemaining = lTotal - lCurrent
-                    printDEBUG("lRemaining=%d" % lRemaining)
+                    #printDEBUG("lRemaining=%d" % lRemaining)
                     self["currTimeLabel"].setText(s)
 
                     s = self.convertTime(lRemaining)
@@ -1055,10 +1063,10 @@ class AdvancedFreePlayerStart(Screen):
   <widget source="key_blue" render="Label" position="955,647" size="260,25" zPosition="1" font="Regular;20" halign="left" transparent="1" />
   <!-- Selected movie -->
   <eLabel position=" 44,561" size="725, 30" zPosition="-10" backgroundColor="#20606060" />
-  <widget name="filemovie" position="50,560" size="715,30" font="Regular; 20" transparent="1" valign="center" />
+  <widget name="filemovie" position="50,560" size="715,30" font="Regular; 20" transparent="1" valign="center" noWrap="1" />
   <!-- Selected subtitle -->
   <eLabel position="44,597" size="725, 30" zPosition="-10" backgroundColor="#20606060" />
-  <widget name="filesubtitle" position="50,597" size="715,30" font="Regular; 20" transparent="1" valign="center" />
+  <widget name="filesubtitle" position="50,597" size="715,30" font="Regular; 20" transparent="1" valign="center" noWrap="1" />
   
   <widget name="info" position="40,25" size="200,30" font="Regular; 27" backgroundColor="#20606060" transparent="1" />
   <widget name="myPath" position="50,86" size="715,25" font="Regular;20" foregroundColor="#00ffffff" backgroundColor="#004e4e4e" transparent="1" />
