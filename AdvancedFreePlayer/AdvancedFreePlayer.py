@@ -42,16 +42,7 @@ config.plugins.AdvancedFreePlayer.StoreLastFolder = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.InfobarConfig = ConfigText(default = "", fixed_size = False)
 config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
 
-class AdvancedFreePlayer(Screen):
-    CUT_TYPE_IN = 0
-    CUT_TYPE_OUT = 1
-    CUT_TYPE_MARK = 2
-    CUT_TYPE_LAST = 3
-    ENABLE_RESUME_SUPPORT = True
-    VISIBLE = 4
-    HIDDEN = 5
-
-    KeyMapInfo=_("KEYMAP:\n\
+KeyMapInfo=_("Player KEYMAP:\n\n\
 up/down - position subtitle\n\
 left/right - size subtitle\n\
 channel up/down - seek+/- subtitle\n\
@@ -66,6 +57,15 @@ menu - show about\n\
 ok - infobar\n\
 audio - change audio track\n\
 ")
+
+class AdvancedFreePlayer(Screen):
+    CUT_TYPE_IN = 0
+    CUT_TYPE_OUT = 1
+    CUT_TYPE_MARK = 2
+    CUT_TYPE_LAST = 3
+    ENABLE_RESUME_SUPPORT = True
+    VISIBLE = 4
+    HIDDEN = 5
 
     def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService):
         self.conditionalNotVisible = []
@@ -873,7 +873,7 @@ audio - change audio track\n\
             self.enablesubtitle = True
 
     def HelpScreen(self):
-        self.session.open(MessageBox,PluginName + ' ' + PluginInfo +"\n\n"+self.KeyMapInfo,  MessageBox.TYPE_INFO)
+        self.session.open(MessageBox,PluginName + ' ' + PluginInfo +"\n\n"+ KeyMapInfo,  MessageBox.TYPE_INFO)
 
     def audio(self):
         from Screens.AudioSelection import AudioSelection
@@ -1053,7 +1053,8 @@ class AdvancedFreePlayerStart(Screen):
   <eLabel position="0,0"    size="1280,720" zPosition="-15" backgroundColor="#20000000" />
   <eLabel position=" 44, 81" size="725,474" zPosition="-10" backgroundColor="#20606060" />
   <eLabel position="775,251" size="445,376" zPosition="-10" backgroundColor="#20606060" />
-  <eLabel position="775, 81" size="445,165" zPosition="-10" backgroundColor="#20606060" />
+  <eLabel position="775, 81" size="117,165" zPosition="-10" backgroundColor="#20606060" />
+  <eLabel position="897, 81" size="323,165" zPosition="-10" backgroundColor="#20606060" />
   <eLabel position=" 45,633" size="290, 55" zPosition="-10" backgroundColor="#20b81c46" />
   <eLabel position="340,633" size="290, 55" zPosition="-10" backgroundColor="#20009f3c" />
   <eLabel position="635,633" size="290, 55" zPosition="-10" backgroundColor="#209ca81b" />
@@ -1069,11 +1070,12 @@ class AdvancedFreePlayerStart(Screen):
   <eLabel position="44,597" size="725, 30" zPosition="-10" backgroundColor="#20606060" />
   <widget name="filesubtitle" position="50,597" size="715,30" font="Regular; 20" transparent="1" valign="center" noWrap="1" />
   
-  <widget name="info" position="40,25" size="200,30" font="Regular; 27" backgroundColor="#20606060" transparent="1" />
+  <widget name="info" position="40,25" size="800,30" font="Regular; 27" backgroundColor="#20606060" transparent="1" />
   <widget name="myPath" position="50,86" size="715,25" font="Regular;20" foregroundColor="#00ffffff" backgroundColor="#004e4e4e" transparent="1" />
   <widget name="filelist" position="60,116" size="690,439" zPosition="1" font="Regular;20" transparent="1" scrollbarMode="showOnDemand" />
 
-  <widget name="Description" render="Label" position="780,256" size="435,366" font="Regular;20" zPosition="1" foregroundColor="foreground" transparent="1" valign="top"/>
+  <widget name="Description" position="780,256" size="435,366" font="Regular;18" zPosition="1" transparent="1"/>
+  <widget name="Cover" position="780,86" size="107,155" alphatest="blend" />
   </screen>
 """
         
@@ -1084,7 +1086,8 @@ class AdvancedFreePlayerStart(Screen):
         self["filemovie"] = Label(self.movietxt)
         self["filesubtitle"] = Label(self.subtitletxt)
         self["key_red"] = StaticText(_("Play"))
-        self["Description"] = StaticText("Description")
+        self["Description"] = Label(KeyMapInfo)
+        self["Cover"] = Pixmap()
         
         if path.exists(PluginPath +'../DMnapi/DMnapi.pyo') or path.exists(PluginPath +'../DMnapi/DMnapi.pyc') or path.exists(PluginPath +'../DMnapi/DMnapi.py'):
             self.DmnapiInstalled = True
@@ -1216,7 +1219,7 @@ class AdvancedFreePlayerStart(Screen):
             d = self.filelist.getCurrentDirectory()
             f = self.filelist.getFilename()
             printDEBUG("self.OK>> " + d + f)
-            temp = f[-4:]
+            temp = self.getExtension(f)
             #print temp
             if temp == ".srt" or temp == ".txt":
                 if self.DmnapiInstalled == True:
@@ -1234,8 +1237,12 @@ class AdvancedFreePlayerStart(Screen):
                     else:
                         self.openmovie = ''
                         self["filemovie"].setText(self.movietxt)
-                self.openmovie = d + f
-                self["filemovie"].setText(self.movietxt + f)
+                else:
+                    self.openmovie = d + f
+                    self["filemovie"].setText(self.movietxt + f)
+                
+                self.SetDescriptionAndCover(self.openmovie)
+                
                 if self.DmnapiInstalled == True:
                     temp = f[:-4]
                     if path.exists( d + temp + ".srt"):
@@ -1249,6 +1256,103 @@ class AdvancedFreePlayerStart(Screen):
                         self.opensubtitle = ''
                 else:
                     self.opensubtitle = ''
+
+    def getNameWithoutExtension(self, MovieNameWithExtension):
+        extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
+        return MovieNameWithExtension[: -extLenght]
+      
+    def getExtension(self, MovieNameWithExtension):
+        return path.splitext( path.basename(MovieNameWithExtension) )[1]
+      
+    def SetDescriptionAndCover(self, MovieNameWithPath):
+        if MovieNameWithPath == '':
+            self["Cover"].hide()
+            self["Description"].setText('')
+            return
+        
+        temp = self.getNameWithoutExtension(MovieNameWithPath)
+        ### COVER ###
+        if path.exists(temp + '.jpg'):
+            self["Cover"].instance.setScale(1)
+            self["Cover"].instance.setPixmap(LoadPixmap(path=temp + '.jpg'))
+            self["Cover"].show()
+        else:
+            self["Cover"].hide()
+            
+        ### DESCRIPTION from EIT ###
+        if path.exists(temp + '.eit'):
+            def parseMJD(MJD):
+                # Parse 16 bit unsigned int containing Modified Julian Date,
+                # as per DVB-SI spec
+                # returning year,month,day
+                YY = int( (MJD - 15078.2) / 365.25 )
+                MM = int( (MJD - 14956.1 - int(YY*365.25) ) / 30.6001 )
+                D  = MJD - 14956 - int(YY*365.25) - int(MM * 30.6001)
+                K=0
+                if MM == 14 or MM == 15: K=1
+                return "%02d/%02d/%02d" % ( (1900 + YY+K), (MM-1-K*12), D)
+
+            def unBCD(byte):
+                return (byte>>4)*10 + (byte & 0xf)
+
+            import struct
+
+            with open(temp + '.eit','r') as descrTXT:
+                data = descrTXT.read() #[19:].replace('\00','\n')
+                ### Below is based on EMC handlers, thanks to author!!!
+                e = struct.unpack(">HHBBBBBBH", data[0:12])
+                myDescr = _('Recorded: %s %02d:%02d:%02d\n') % (parseMJD(e[1]), unBCD(e[2]), unBCD(e[3]), unBCD(e[4]) )
+                myDescr += _('Lenght: %02d:%02d:%02d\n\n') % (unBCD(e[5]), unBCD(e[6]), unBCD(e[7]) )
+                extended_event_descriptor = []
+                EETtxt = ''
+                pos = 12
+                while pos < len(data):
+                    rec = ord(data[pos])
+                    length = ord(data[pos+1]) + 2
+                    if rec == 0x4E:
+                    #special way to handle CR/LF charater
+                        for i in range (pos+8,pos+length):
+                            if str(ord(data[i]))=="138":
+                                extended_event_descriptor.append("\n")
+                            else:
+                                if data[i]== '\x10' or data[i]== '\x00' or  data[i]== '\x02':
+                                    pass
+                                else:
+                                    extended_event_descriptor.append(data[i])
+                    pos += length
+
+                    # Very bad but there can be both encodings
+                    # User files can be in cp1252
+                    # Is there no other way?
+                EETtxt = "".join(extended_event_descriptor)
+                if EETtxt:
+                    try:
+                        EETtxt.decode('utf-8')
+                    except UnicodeDecodeError:
+                        try:
+                            EETtxt = EETtxt.decode("cp1250").encode("utf-8")
+                        except UnicodeDecodeError:
+                            # do nothing, otherwise cyrillic wont properly displayed
+                            #extended_event_descriptor = extended_event_descriptor.decode("iso-8859-1").encode("utf-8")
+                            pass
+                
+                self["Description"].setText(myDescr + self.ConvertChars(EETtxt) )
+        ### DESCRIPTION from TXT ###
+        elif path.exists(temp + '.txt'):
+            with open(temp + '.txt','r') as descrTXT:
+                myDescr = descrTXT.read()
+                if myDescr[0] == "{" or myDescr[0] =="[" or myDescr[1] == ":" or myDescr[2] == ":":
+                    self["Description"].setText('')
+                else:
+                    self["Description"].setText(myDescr)
+        else:
+            self["Description"].setText('')
+    
+    def ConvertChars(self, text):
+        CharsTable={ '\xC2\xB1': '\xC4\x85','\xC2\xB6': '\xC5\x9b','\xC4\xBD': '\xC5\xba'}
+        for i, j in CharsTable.iteritems():
+            text = text.replace(i, j)
+        return text
 
     def ExitPlayer(self):
         configfile.save()
