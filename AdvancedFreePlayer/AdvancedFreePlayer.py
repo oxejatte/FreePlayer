@@ -40,6 +40,7 @@ config.plugins.AdvancedFreePlayer.InfobarOnPause = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
 config.plugins.AdvancedFreePlayer.StoreLastFolder = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.InfobarConfig = ConfigText(default = "", fixed_size = False)
+config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
 
 class AdvancedFreePlayer(Screen):
     CUT_TYPE_IN = 0
@@ -176,7 +177,7 @@ audio - change audio track\n\
                 "right": self.right,
                 "stop": self.Exit,
                 "pause": self.pause,
-                "pay": self.play,
+                "play": self.play,
                 "key3": self.key3,
                 "key6": self.key6,
                 "key9": self.key9,
@@ -186,7 +187,7 @@ audio - change audio track\n\
                 "key5": self.fontBackgroundToggle,
                 "channelup": self.channelup,
                 "channeldown": self.channeldown,
-                "red": self.play,
+                "play": self.play,
                 "togglePause": self.togglePause,
                 "yellow": self.Ok,
                 "blue": self.color,
@@ -1040,7 +1041,7 @@ class AdvancedFreePlayerStart(Screen):
         #printDEBUG("AdvancedFreePlayerStart >>>")
         self.sortDate = False
         self.openmovie = ""
-        self.opensubtitle = ""
+        self.opensubtitle = "aqq"
         self.movietxt = _('Movie: ')
         self.subtitletxt = _('Subtitle: ')
         self.rootID = config.plugins.AdvancedFreePlayer.MultiFramework.value
@@ -1216,18 +1217,23 @@ class AdvancedFreePlayerStart(Screen):
             f = self.filelist.getFilename()
             printDEBUG("self.OK>> " + d + f)
             temp = f[-4:]
-            print temp
+            #print temp
             if temp == ".srt" or temp == ".txt":
                 if self.DmnapiInstalled == True:
-                    if self.opensubtitle == (d + f):
-                        d = ""
-                        f = ""
-                    self["filesubtitle"].setText(self.subtitletxt + f)
-                    self.opensubtitle = d + f
+                    if self.opensubtitle == (d + f): #clear subtitles selection
+                        self["filesubtitle"].setText(self.subtitletxt)
+                        self.opensubtitle = ''
+                    else:
+                        self["filesubtitle"].setText(self.subtitletxt + f)
+                        self.opensubtitle = d + f
             else:
                 if self.openmovie == (d + f):
-                    d = ""
-                    f = ""
+                    if config.plugins.AdvancedFreePlayer.KeyOK.value == 'play':
+                        self.PlayMovie()
+                        return
+                    else:
+                        self.openmovie = ''
+                        self["filemovie"].setText(self.movietxt)
                 self.openmovie = d + f
                 self["filemovie"].setText(self.movietxt + f)
                 if self.DmnapiInstalled == True:
@@ -1238,8 +1244,11 @@ class AdvancedFreePlayerStart(Screen):
                     elif path.exists( d + temp + ".txt"):
                         self["filesubtitle"].setText(self.subtitletxt + temp + ".txt")
                         self.opensubtitle = d + temp + ".txt"
+                    else:
+                        self["filesubtitle"].setText(self.subtitletxt)
+                        self.opensubtitle = ''
                 else:
-                    self.opensubtitle = ""
+                    self.opensubtitle = ''
 
     def ExitPlayer(self):
         configfile.save()

@@ -6,7 +6,7 @@
     <key id="KEY_HELP" mapto="HelpScreen" flags="b" />      
     <key id="KEY_INFO" mapto="HelpScreen" flags="b" />
     
-			<key id="KEY_OK" mapto="ToggleInfobar" flags="m" />
+    <key id="KEY_OK" mapto="ToggleInfobar" flags="m" />
 			<key id="KEY_EXIT" mapto="cancel" flags="m" />
 			<key id="KEY_HOME" mapto="cancel" flags="m" />
 			<key id="KEY_UP" mapto="up" flags="m" />
@@ -14,12 +14,12 @@
 			<key id="KEY_LEFT" mapto="left" flags="m" />
 			<key id="KEY_RIGHT" mapto="right" flags="m" />
 			
-			<key id="KEY_RED" mapto="red" flags="m" />
-			<key id="KEY_GREEN" mapto="togglePause" flags="m" />
+    <key id="KEY_RED" mapto="play" flags="m" />
+    <key id="KEY_GREEN" mapto="togglePause" flags="m" />
 			<key id="KEY_YELLOW" mapto="yellow" flags="m" />
 			<key id="KEY_BLUE" mapto="blue" flags="m" />
 
-			<key id="KEY_PLAY" mapto="play" flags="m" />
+    <key id="KEY_PLAY" mapto="play" flags="m" />
 			<key id="KEY_PAUSE" mapto="pause" flags="m" />
 			<key id="KEY_STOP" mapto="stop" flags="m" />
 			
@@ -62,15 +62,5 @@
     <key id="KEY_RIGHT" mapto="pageDown" flags="m" />
     <key id="KEY_PAGEUP" mapto="pageUp" flags="m" />
     <key id="KEY_PAGEDOWN" mapto="pageDown" flags="m" />
-
-			<!--key id="KEY_INFO" mapto="info" flags="m" />
-
-			<key id="KEY_CHANNELUP" mapto="channelup" flags="m" />
-			<key id="KEY_CHANNELDOWN" mapto="channeldown" flags="m" />
-
-			<key id="KEY_TEXT" mapto="text" flags="m" />
-			<key id="KEY_MENU" mapto="menu" flags="m" />
-			<key id="KEY_AUDIO" mapto="audio" flags="m" /-->
-
-    </map>
+  </map>
 </keymap>

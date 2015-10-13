@@ -186,5 +186,13 @@ msgid "Time displaying infobar"
 msgstr "Czas wyświetlania paska informacyjnego"
 
 msgid "Display infobar on pause:"
-msgstr "Wyświetl pasek informacyjny podczas pauzy"
+msgstr "Wyświetl pasek informacyjny podczas pauzy:"
 
+msgid "Key OK behavior:"
+msgstr "Zachowanie klawisza OK:"
+
+msgid "Select/Unselect"
+msgstr "Zaznacz/Odznacz"
+
+msgid "Select>Play"
+msgstr "Zaznacz>Odtwórz"

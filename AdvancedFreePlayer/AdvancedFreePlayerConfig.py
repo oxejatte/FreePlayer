@@ -57,9 +57,9 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         
         self.list.append(getConfigListEntry(_("Time displaying infobar:"), config.plugins.AdvancedFreePlayer.InfobarTime))
         self.list.append(getConfigListEntry(_("Display infobar on pause:"), config.plugins.AdvancedFreePlayer.InfobarOnPause))
+        self.list.append(getConfigListEntry(_("Key OK behavior:"), config.plugins.AdvancedFreePlayer.KeyOK))
 
         self.list.append(getConfigListEntry(_("MultiFramework selection (sh4 only):"), config.plugins.AdvancedFreePlayer.MultiFramework))
-        
         
         self["config"].list = self.list        
         self.onLayoutFinish.append(self.layoutFinished)
