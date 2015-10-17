@@ -17,9 +17,9 @@ from Components.ServiceEventTracker import ServiceEventTracker
 from Components.GUIComponent import GUIComponent
 from Components.Converter.ConditionalShowHide import ConditionalShowHide
 from Tools.LoadPixmap import LoadPixmap
-from os import path, remove
+from os import path, remove, listdir, symlink
 
-from enigma import eTimer,ePoint,eSize,eLabel,gFont,eConsoleAppContainer,iServiceInformation,eServiceReference,addFont,getDesktop, iPlayableService
+from enigma import eTimer,ePoint,eSize,gFont,eConsoleAppContainer,iServiceInformation,eServiceReference, addFont, getDesktop, iPlayableService
 
 from skin import parseColor,parseFont
 
@@ -34,13 +34,20 @@ config.plugins.AdvancedFreePlayer.MultiFramework = ConfigSelection(default = "40
 config.plugins.AdvancedFreePlayer.StopService = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.InfobarTime = ConfigInteger(5, (2,9))
 config.plugins.AdvancedFreePlayer.InfobarOnPause = ConfigYesNo(default = True)
+config.plugins.AdvancedFreePlayer.DeleteFileQuestion = ConfigYesNo(default = True)
+config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed = ConfigInteger(1, (0,100))
+config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
+config.plugins.AdvancedFreePlayer.SRTplayer = ConfigSelection(default = "system", choices = [("system", _("System")),("plugin", _("Plugin"))])
+config.plugins.AdvancedFreePlayer.TXTplayer = ConfigSelection(default = "plugin", choices = [("convert", _("System after conversion to srt")),("plugin", _("Plugin"))])
+config.plugins.AdvancedFreePlayer.Version = ConfigSelection(default = "public", choices = [("debug", _("every new version (debug)")),("public", _("only checked versions"))])
 #
 # hidden atributes to store configuration data
 #
 config.plugins.AdvancedFreePlayer.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
 config.plugins.AdvancedFreePlayer.StoreLastFolder = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.InfobarConfig = ConfigText(default = "", fixed_size = False)
-config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
+config.plugins.AdvancedFreePlayer.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
+#position,size,type,color,visibility,background
 
 KeyMapInfo=_("Player KEYMAP:\n\n\
 up/down - position subtitle\n\
@@ -48,12 +55,12 @@ left/right - size subtitle\n\
 channel up/down - seek+/- subtitle\n\
 3/6/9 - seek+ 30sek/2min/5min movie\n\
 1/4/7 - seek- 30sek/2min/5min movie\n\
-play/red - play\n\
-green - pause\n\
+play/red - pause on/off\n\
+green - change background color\n\
 yellow - change type font\n\
 blue - change color font\n\
 text - show/hide subtitle\n\
-menu - show about\n\
+menu/info - show about\n\
 ok - infobar\n\
 audio - change audio track\n\
 ")
@@ -66,15 +73,18 @@ class AdvancedFreePlayer(Screen):
     ENABLE_RESUME_SUPPORT = True
     VISIBLE = 4
     HIDDEN = 5
+    SHOWNSUBTITLE = 6
+    HIDDENSUBTITLE = 7
 
     def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService):
         self.conditionalNotVisible = []
+        self.PercentagePlayed = 0
         self.frameon = 1 / 24
         self.seeksubtitle = 0
         self.resume_point = 0
         self.nrsubtitle = 0
         self.enablesubtitle = True
-        self.statesubtitle = "Show"
+        self.statesubtitle = self.HIDDENSUBTITLE
         self.stateplay = ""
         self.stateinfo = self.VISIBLE
         self.oldinfo = ""
@@ -95,11 +105,14 @@ class AdvancedFreePlayer(Screen):
         self.fonttype_nr_ = self.fonttype_nr
         self.fontcolor_nr = 0
         self.fontcolor_nr_ = self.fontcolor_nr
+        self.fontbackground_nr = 0
+        self.fontbackground_nr_ = self.fontbackground_nr
         self.fontBackgroundState = 1
         self.fontBackgroundState_ = self.fontBackgroundState
         #load
         self.loadfont()
         self.loadcolor()
+        self.loadBackgroundColor()
         self.loadconfig()
         if self.opensubtitle == "":
             self.enablesubtitle = False
@@ -107,14 +120,6 @@ class AdvancedFreePlayer(Screen):
         isHD = False
         isWideScreen = False
         isDolby = False
-        #current state print
-        print "FontPos = ", self.fontpos
-        print "FontSize = ", self.fontsize
-        print "FontType = ", self.fonttype_nr
-        print "FontColor = ", self.fontcolor_nr
-        print "fontBackgroundState = ", self.fontBackgroundState
-        printDEBUG("OpenMovie: '%s'" % self.openmovie)
-        printDEBUG("OpenSubtitle: '%s'" % self.opensubtitle)
         self.skin = """
 <screen name="AdvancedFreePlayer" position="0,0" size="1280,720" title="InfoBar" backgroundColor="transparent" flags="wfNoBorder">
     <!-- OSD -->
@@ -135,13 +140,7 @@ class AdvancedFreePlayer(Screen):
     <widget name="Is_HD_Icon" position="935,35" size="60,60" zPosition="1" alphatest="blend" />
     <widget name="IsMultichannel_Icon" position="1000,35" size="60,60" zPosition="1" alphatest="blend" />
     <!-- SubTiles -->
-    <widget name="fpSRT_1" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
-    <widget name="fpSRT_2" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
-    <widget name="fpSRT_3" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
-    <widget name="fpSRT_4" position="0,540" size="1920,220" valign="center" halign="center" font="Regular;24" backgroundColor="background" shadowColor="black" shadowOffset="-3,-2" transparent="1" />
-
-    <!--widget name="fpSRT_bg" position="0,540" size="1920,220" valign="center" halign="center" backgroundColor="transpBlack" zPosition="1"/-->
-    
+    <widget name="afpSubtitles" position="0,0" size="1,1" valign="center" halign="center" font="Regular;60" backgroundColor="black" transparent="0" />
   </screen>""" % (PluginPath, PluginPath )
 
         Screen.__init__(self, session)
@@ -152,13 +151,9 @@ class AdvancedFreePlayer(Screen):
         self["Is_HD_Icon"] = Pixmap()
         self["IsMultichannel_Icon"] = Pixmap()
         self["IsWidescreen_Icon"] = Pixmap()
-        self["fpSRT_1"] = Label()
-        self["fpSRT_2"] = Label()
-        self["fpSRT_3"] = Label()
-        self["fpSRT_4"] = Label()
-        self["fpSRT_bg"] = Label()
-
-        self.fontLines = ["fpSRT_1", "fpSRT_2", "fpSRT_3", "fpSRT_4", "fpSRT_bg"]
+        self["afpSubtitles"] = Label()
+        
+        self.fontLines = ["afpSubtitles"]
 
         self["currTimeLabel"] = Label()
         self["lengthTimeLabel"] = Label()
@@ -170,29 +165,27 @@ class AdvancedFreePlayer(Screen):
                 "ToggleInfobar": self.ToggleInfobar,
                 "HelpScreen": self.HelpScreen,
                 
-                "cancel": self.Exit,
-                "up": self.up,
-                "down": self.down,
-                "left": self.left,
-                "right": self.right,
-                "stop": self.Exit,
+                "ExitPlayer": self.ExitPlayer,
+                "MoveSubsUp": self.MoveSubsUp,
+                "MoveSubsDown": self.MoveSubsDown,
+                "SetSmallerFont": self.SetSmallerFont,
+                "SetBiggerFont": self.SetBiggerFont,
                 "pause": self.pause,
                 "play": self.play,
-                "key3": self.key3,
-                "key6": self.key6,
-                "key9": self.key9,
-                "key1": self.key1,
-                "key4": self.key4,
-                "key7": self.key7,
-                "key5": self.fontBackgroundToggle,
-                "channelup": self.channelup,
-                "channeldown": self.channeldown,
-                "play": self.play,
+                "FastF30s": self.FastF30s,
+                "FastF120s": self.FastF120s,
+                "FastF300s": self.FastF300s,
+                "BackF30s": self.BackF30s,
+                "BackF120s": self.BackF120s,
+                "BackF300s": self.BackF300s,
+                "toggleFontBackground": self.toggleFontBackground,
+                "SeekUpSubtitles": self.SeekUpSubtitles,
+                "SeekDownSubtitles": self.SeekDownSubtitles,
                 "togglePause": self.togglePause,
-                "yellow": self.Ok,
-                "blue": self.color,
-                "text": self.text,
-                "audio": self.audio,
+                "ToggleFont": self.ToggleFont,
+                "ToggleFontColor": self.ToggleFontColor,
+                "ToggleSubtitles": self.ToggleSubtitles,
+                "audioSelected": self.audioSelected,
             },-2)
         self.onShown.append(self.__LayoutFinish)
         self.onClose.append(self.__onClose)
@@ -212,16 +205,16 @@ class AdvancedFreePlayer(Screen):
                                                       })
 
     def __serviceStarted(self):
-        printDEBUG('__serviceStarted >>>')
+        #printDEBUG('__serviceStarted >>>')
         self.__UpdateIcons()
         self.resumeLastPlayback()
 
     def __evStart(self): #needed for openPLI PC
-        printDEBUG('__evStart >>>')
+        #printDEBUG('__evStart >>>')
         self.__UpdateIcons()
 
     def __evUpdatedInfo(self):
-        printDEBUG('__evUpdatedInfo >>>')
+        #printDEBUG('__evUpdatedInfo >>>')
         self.__UpdateIcons()
 
     def getIconPtr(self, IconName):
@@ -229,19 +222,19 @@ class AdvancedFreePlayer(Screen):
             myPath = '%sicons/%s' % (SkinPath,IconName)
         else:
             myPath = '%spic/%s' % (PluginPath, IconName)
-        printDEBUG(myPath)
+        #printDEBUG(myPath)
         IconPtr = LoadPixmap(cached=True,path=myPath ) 
         return IconPtr
 
     def __UpdateIcons(self):
-        printDEBUG('__UpdateIcons >>>')
+        #printDEBUG('__UpdateIcons >>>')
         service=self.session.nav.getCurrentService()
         if service is not None:
-            printDEBUG('__UpdateIcons service exists')
+            #printDEBUG('__UpdateIcons service exists')
             info=service.info()
             height = info and info.getInfo(iServiceInformation.sVideoHeight) or -1
             width = info and info.getInfo(iServiceInformation.sVideoWidth) or -1
-            printDEBUG('__UpdateIcons video size %dX%d' % (width,height))
+            #printDEBUG('__UpdateIcons video size %dX%d' % (width,height))
             if height > 719 : #set HD
                 self["Is_HD_Icon"].instance.setPixmap(self.getIconPtr('ico_hd_on.png') )
             elif height > 0:
@@ -269,27 +262,24 @@ class AdvancedFreePlayer(Screen):
                         self["IsMultichannel_Icon"].instance.setPixmap(self.getIconPtr('ico_sound_off.png') )
 
     def __onClose(self):
-        if self.fontpos != self.fontpos_ or self.fontsize != self.fontsize_ or self.fonttype_nr != self.fonttype_nr_ \
-        or self.fontcolor_nr != self.fontcolor_nr_ or self.osdPosX != self.osdPosX_ or self.osdPosY != self.osdPosY_ \
-        or self.fontBackgroundState != self.fontBackgroundState_:
-            print "[FP] write config"
-            o = open(PluginPath + PluginName + '.ini','w')
-            o.write(str(self.fontpos)+"\n")
-            o.write(str(self.fontsize)+"\n")
-            o.write(str(self.fonttype_nr)+"\n")
-            o.write(str(self.fontcolor_nr)+"\n")
-            o.write(str(self.fontBackgroundState)+"\n")
-            o.close()
+        config.plugins.AdvancedFreePlayer.Inits.value = str(self.fontpos) + "," + str(self.fontsize) + "," + \
+                                                        str(self.fonttype_list[self.fonttype_nr]) + "," + str(self.fontcolor_nr) + "," + \
+                                                        str(self.fontBackgroundState) + "," + str(self.fontbackground_nr)
+        config.plugins.AdvancedFreePlayer.Inits.save()
+
         self.hideOSDTimer.stop()
         if self.LastPlayedService:
             self.session.nav.playService(self.LastPlayedService)
 
     def __LayoutFinish(self):
-        print "--> Start of __LayoutFinish"
+        #print "--> Start of __LayoutFinish"
+        self.currentHeight= getDesktop(0).size().height()
+        self.currentWidth = getDesktop(0).size().width()
+        
         self.onShown.remove(self.__LayoutFinish)
         print "--> Loading subtitles"
         self.loadsubtitle()
-        print "--> Updating osd position"
+        #print "--> Updating osd position"
         try:
             tmpOSD = config.plugins.AdvancedFreePlayer.InfobarConfig.value.split(',')
             tmpOSDPosX = int(tmpOSD[0])
@@ -349,26 +339,32 @@ class AdvancedFreePlayer(Screen):
         self.timer = eTimer()
         self.timer.callback.append(self.timerEvent)
         self.timer.start(200, False)
-        root = eServiceReference("4097:0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        root = eServiceReference(self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
         self.session.nav.playService(root)
         self.stateplay = "Play"
         for fontLine in self.fontLines:
             self[fontLine].instance.move(ePoint(0,self.fontpos))
             self[fontLine].instance.setForegroundColor(parseColor(self.fontcolor_list[self.fontcolor_nr]))
-        print "End of go"
+            self[fontLine].instance.setBackgroundColor(parseColor(self.backgroundcolor_list[self.fontbackground_nr]))
+            
+        #print "End of go"
 
     def loadfont(self):
-        o = open(PluginPath + 'font.ini','r')
         self.fonttype_list = []
         self.fonttype_list.append("Regular")
-        while True:
-            l = o.readline()
-            if len(l) == 0: break
-            l = l.strip()
-            self.fonttype_list.append(l)
-            #print l
-            addFont(PluginPath + 'fonts/'+l, l, 100, False)
-        o.close()
+          
+        fonts = []
+        fonts_paths =[ "/usr/share/fonts/" , PluginPath + "fonts/"]
+        for font_path in fonts_paths:
+            if path.exists(font_path):
+                for file in os.listdir(font_path):
+                    if file.lower().endswith(".ttf") and file not in fonts:
+                        fonts.append( (font_path + '/' + file, file))
+                        addFont(font_path + '/' + file, file, 100, False)
+        fonts.sort()
+        for font in fonts:
+            self.fonttype_list.append(font[1])  
 
     def loadcolor(self):
         o = open(PluginPath + 'color.ini','r')
@@ -382,24 +378,33 @@ class AdvancedFreePlayer(Screen):
             self.fontcolor_list.append(l)
         o.close()
 
-    def loadconfig(self):
-        o = open(PluginPath + 'AdvancedFreePlayer.ini','r')
-        self.fontpos = int(o.readline())
-        self.fontsize = int(o.readline())
-        self.fonttype_nr = int(o.readline())
-        self.fontcolor_nr = int(o.readline())
-        self.fontBackgroundState = int(o.readline())
+    def loadBackgroundColor(self):
+        self.backgroundcolor_list = []
+        self.backgroundcolor_list.append("black")
+        if path.exists(PluginPath + 'backgrounds.ini'):
+            with open(PluginPath + 'backgrounds.ini','r') as o:
+                for l in o:
+                    if len(l) > 0:
+                        l = l.strip()
+                        #print l
+                        self.backgroundcolor_list.append(l)
+                o.close()
 
-        self.fontpos_ = self.fontpos
-        self.fontsize_ = self.fontsize
-        if (self.fonttype_nr+1) > len(self.fonttype_list):
-            self.fonttype_nr=0
-        if (self.fontcolor_nr+1) > len(self.fontcolor_list):
-            self.fontcolor_nr=0
-        self.fonttype_nr_ = self.fonttype_nr
-        self.fontcolor_nr_ = self.fontcolor_nr
-        self.fontBackgroundState_ = self.fontBackgroundState
-        o.close()
+    def loadconfig(self):
+        try:
+            configs=config.plugins.AdvancedFreePlayer.Inits.value.split(',')
+        except:
+            return
+            
+        self.fontpos = int(configs[0])
+        self.fontsize = int(configs[1])
+        
+        self.fonttype_nr = 0
+        tmp = configs[2]
+        
+        self.fontcolor_nr = int(configs[3])
+        self.fontBackgroundState = int(configs[4])
+        self.fontbackground_nr = int(configs[5])
 
     def convertTime(self, time):
 #        print "convertTime:"+str(time)
@@ -434,32 +439,29 @@ class AdvancedFreePlayer(Screen):
 
                     self['progressBar'].range = (0, lTotal/90000)
                     self['progressBar'].value = lCurrent/90000
+                    if lTotal != 0:
+                        self.PercentagePlayed = 100* lCurrent/ lTotal
 
 
     def showsubtitle(self,tim):
         if self.enablesubtitle == False:
             return
-        tim = tim + (self.seeksubtitle * 90000)
+        tim = tim + (self.seeksubtitle * 90000) #current position + movement
         for pos in self.subtitle:
             nr=pos[0]
             start=pos[1]
             stop=pos[2]
             text=pos[3]
-            if self.statesubtitle == "Show":
-                if (tim == start or tim > start) and tim < stop:
-                    self.nrsubtitle = nr
-                    self.statesubtitle = "Hide"
-                    self.setTextForAllLInes(text)
-                    #print tim," Show ",nr," ",start," --> ",stop,"     ",text
-            else:
-                if (tim == stop or tim > stop) and nr == self.nrsubtitle:
-                    self.statesubtitle = "Show"
+            if tim >= start and tim < stop and (nr > self.nrsubtitle  or self.nrsubtitle == 0):
+                self.nrsubtitle = nr
+                self.setTextForAllLInes(text)
+                self.statesubtitle = self.SHOWNSUBTITLE
+                printDEBUG ("%d Show %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
+            elif tim > stop and nr == self.nrsubtitle:
+                if self.statesubtitle == self.SHOWNSUBTITLE:
                     self.setTextForAllLInes("")
-                    #print tim," Hide ",nr," ",start," --> ",stop,"     ",text
-                elif tim < start and nr == self.nrsubtitle:
-                    self.statesubtitle = "Show"
-                    self.setTextForAllLInes("")
-                    #print tim," Hide ",nr," ",start," --> ",stop,"     ",text
+                    self.statesubtitle = self.HIDDENSUBTITLE
+                    printDEBUG ("%d Hide %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
 
     def usun(self,l):
         if l[0] == "{":
@@ -679,7 +681,7 @@ class AdvancedFreePlayer(Screen):
 
     def loadsrt(self):
         self.subtitle = []
-        printDEBUG("[FP] Load subtitle STR")
+        #printDEBUG("[FP] Load subtitle STR")
         try:
             if path.exists(self.opensubtitle):
                 o = open(self.opensubtitle,'r')
@@ -691,14 +693,14 @@ class AdvancedFreePlayer(Screen):
                         break
                 while True:
                     nr = o.readline().replace("\r\n","\n")
-                    printDEBUG(nr)
+                    #printDEBUG(nr)
                     if len(nr) == 0:break
                     if nr == "\n": continue
                     nr = nr.strip()
                     tim = o.readline().replace("\r\n","\n")
                     if len(tim) == 0:break
                     tim = tim.strip()
-                    printDEBUG(tim)
+                    #printDEBUG(tim)
                     l1 = o.readline().replace("\r\n","\n")
                     if len(l1) == 0:break
                     l1 = l1.strip()
@@ -747,6 +749,8 @@ class AdvancedFreePlayer(Screen):
             except:
                 pass
             self.session.open(MessageBox,"Error load subtitle !!!",  MessageBox.TYPE_ERROR, timeout=5)
+        #for aqq in self.subtitle:
+        #    printDEBUG( '%d %s %s %s' % (aqq[0],aqq[1],aqq[2], aqq[3]) )
 
     def __getSeekable(self):
         service = self.session.nav.getCurrentService()
@@ -796,41 +800,44 @@ class AdvancedFreePlayer(Screen):
             return
         print "..- doSeekRelative %d" % (pts/90000)
         seekable.seekRelative(pts<0 and -1 or 1, abs(pts))
+        self.nrsubtitle = 0 #reset position
 
-    def updateChannelChange(self, position):
+    def SeekSubtitles(self, position):
         self.seeksubtitle = self.seeksubtitle + position
         self.setTextForAllLInes(str(self.seeksubtitle)+" sek")
+        self.nrsubtitle = 0 #reset position
 
-    def channelup(self):
-        self.updateChannelChange(+0.5)
+    def SeekUpSubtitles(self):
+        self.SeekSubtitles(+0.5)
 
-    def channeldown(self):
-        self.updateChannelChange(-0.5)
+    def SeekDownSubtitles(self):
+        self.SeekSubtitles(-0.5)
 
-    def key3(self):
+    def FastF30s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(30 * 90000)
 
-    def key6(self):
+    def FastF120s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(2 * 60 * 90000)
 
-    def key9(self):
+    def FastF300s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(5 * 60 * 90000)
 
-    def key1(self):
+    def BackF30s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(- 30 * 90000)
 
-    def key4(self):
+    def BackF120s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(- 2 * 60 * 90000)
 
-    def key7(self):
+    def BackF300s(self):
         if self.stateplay == "Play":
             self.doSeekRelative(- 5 * 60 * 90000)
 
+########## TOGGLE PAUSE >>>>>>>>>>
     def togglePause(self):
         if self.stateplay == "Play":
             self.pause()
@@ -864,8 +871,9 @@ class AdvancedFreePlayer(Screen):
         self.stateplay = "Play"
         if config.plugins.AdvancedFreePlayer.InfobarOnPause.value == True:
             self.setVisibleForAll(False, "OSD")
+########## TOGGLE PAUSE <<<<<<<<<<
 
-    def text(self):
+    def ToggleSubtitles(self):
         if self.enablesubtitle == True:
             self.enablesubtitle = False
             self.setTextForAllLInes("")
@@ -875,7 +883,7 @@ class AdvancedFreePlayer(Screen):
     def HelpScreen(self):
         self.session.open(MessageBox,PluginName + ' ' + PluginInfo +"\n\n"+ KeyMapInfo,  MessageBox.TYPE_INFO)
 
-    def audio(self):
+    def SelectAudio(self):
         from Screens.AudioSelection import AudioSelection
         self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
 
@@ -889,17 +897,30 @@ class AdvancedFreePlayer(Screen):
             showBackgroud = False
         self.setVisible(showBackgroud, element)
 
-    def isTextBackground(self, element):
-        if not "bg" in element:
-            return False
-        return True
-
     def setTextForAllLInes(self, text):
-        for fontLine in self.fontLines:
-            if self.isTextBackground(fontLine):
-                self.updateTextBackground(self[fontLine], text)
+        textWidth = 0
+        text = text.strip()
+        if text == '':
+            for fontLine in self.fontLines:
+                self[fontLine].setText('')
+                self[fontLine].hide()
+        else:
+            linesNO = text.count('\n') + 1
+            printDEBUG('linii %d' % linesNO)
+            if linesNO == 1:
+                textWidth = len(text)
             else:
+                for line in text.split('\n'):
+                    tempLen = len(line)
+                    if tempLen > textWidth:
+                        textWidth = tempLen 
+            for fontLine in self.fontLines:
                 self[fontLine].setText(text)
+                textWidth *= self.fontsize
+                center = int( (self.currentWidth - textWidth) /2 )
+                self[fontLine].instance.resize(eSize(textWidth, linesNO * self.fontsize + self.fontsize/2) )
+                self[fontLine].instance.move(ePoint(center, self.fontpos ) )
+                self[fontLine].show()
 
     def setVisible(self, visible, component):
         if visible:
@@ -916,13 +937,12 @@ class AdvancedFreePlayer(Screen):
 
     def setVisibleForAll(self, visible, type):
         if type=="OSD":
-#            print vars(self)
+            #print vars(self)
             startUp = len(self.conditionalNotVisible)
             for val in self.values() + self.renderer:
                 if isinstance(val, GUIComponent):
                     if self.isNotFontLine(val):
-                        print "GUIComponent"
-                        print str(val)
+                        print "GUIComponent:" + str(val)
                         print val.getVisible()
                         if startUp ==0:
                             if hasattr(val, 'sources') and val.sources:
@@ -934,16 +954,7 @@ class AdvancedFreePlayer(Screen):
                         self.setVisible(visible, val)
         elif type=="TEXT":
             for fontLine in self.fontLines:
-                if not self.isTextBackground(fontLine):
-                    self.setVisible(visible, self[fontLine])
-        elif type=="TEXT_BG":
-            for fontLine in self.fontLines:
-                if self.isTextBackground(fontLine):
-                    self.setVisible(visible, self[fontLine])
-
-    def fontBackgroundToggle(self):
-        self.fontBackgroundState = (self.fontBackgroundState+1)%2
-        self.setVisibleForAll(self.fontBackgroundState, "TEXT_BG")
+                self.setVisible(visible, self[fontLine])
 
     def ToggleInfobar(self): #### old info
         self.hideOSDTimer.stop()
@@ -955,32 +966,24 @@ class AdvancedFreePlayer(Screen):
             self.stateinfo = self.HIDDEN
             self.setVisibleForAll(False, "OSD")
 
-    def setFontForAll(self):
+    def setFontSize(self, fontSize):
+        self.fontsize = self.fontsize + fontSize
+        print "font size = ",self.fontsize
         for fontLine in self.fontLines:
             self[fontLine].instance.setFont(gFont(self.fonttype_list[self.fonttype_nr], self.fontsize))
+        self.setTextForAllLInes(_("Line1\nLine2\nLine3"))
 
-    def left(self):
+    def SetSmallerFont(self):
         if self.stateinfo == self.HIDDEN:
-            self.fontsize = self.fontsize - 2
-            print "font size = ",self.fontsize
-            self.setFontForAll()
+            self.setFontSize( -2 )
         else:
             self.updateOSDPosition(-5, 0)
 
-    def right(self):
+    def SetBiggerFont(self):
         if self.stateinfo == self.HIDDEN:
-            self.fontsize = self.fontsize + 2
-            print "font size = ",self.fontsize
-            self.setFontForAll()
+            self.setFontSize(2)
         else:
             self.updateOSDPosition(+5, 0)
-
-    def updateTextMovement(self, fotpos):
-        self.fontpos = self.fontpos + fotpos
-        print "pos y = ",self.fontpos
-        self.setTextForAllLInes("Line1\nLine2\nLine3")
-        for fontLine in self.fontLines:
-            self[fontLine].instance.move(ePoint(0,self.fontpos))
 
     def updateOSDPosition(self, xPos, yPos, AbsolutePosition = False ):
         if AbsolutePosition == False:
@@ -997,43 +1000,72 @@ class AdvancedFreePlayer(Screen):
                     x, y = val.getPosition()
                     val.instance.move(ePoint(x + xPos, y + yPos))
 
+    def toggleFontBackground(self):
+        self.fontbackground_nr = self.fontbackground_nr + 1
+        if self.fontbackground_nr == len(self.backgroundcolor_list):
+            self.fontbackground_nr = 0
+        for fontLine in self.fontLines:
+            self[fontLine].instance.setBackgroundColor(parseColor(self.backgroundcolor_list[self.fontbackground_nr]))
 
-    def up(self):
-        if self.stateinfo == self.HIDDEN:
-            self.updateTextMovement(-5)
-        else:
-            self.updateOSDPosition(0, -5)
-
-    def down(self):
-        if self.stateinfo == self.HIDDEN:
-            self.updateTextMovement(+5)
-        else:
-            self.updateOSDPosition(0, +5)
-
-    def color(self):
+        self.setTextForAllLInes(_("Background ")+str(self.fontbackground_nr))
+      
+    def ToggleFontColor(self):
         self.fontcolor_nr = self.fontcolor_nr + 1
         if self.fontcolor_nr == len(self.fontcolor_list):
             self.fontcolor_nr = 0
         for fontLine in self.fontLines:
             self[fontLine].instance.setForegroundColor(parseColor(self.fontcolor_list[self.fontcolor_nr]))
 
-        self.setTextForAllLInes("Color"+str(self.fontcolor_nr))
+        self.setTextForAllLInes(_("Color ")+str(self.fontcolor_nr))
 
-    def Ok(self):
+    def ToggleFont(self):
         self.fonttype_nr = self.fonttype_nr + 1
         if self.fonttype_nr == len(self.fonttype_list):
             self.fonttype_nr = 0
-        self.setFontForAll()
+        for fontLine in self.fontLines:
+            self[fontLine].instance.setFont(gFont(self.fonttype_list[self.fonttype_nr], self.fontsize))
 
-        self.setTextForAllLInes("Font"+str(self.fonttype_nr))
+        self.setTextForAllLInes(self.fonttype_list[self.fonttype_nr])
 
 
-    def Exit(self):
+    def ExitPlayer(self):
         self.stateplay = "Stop"
-        self.timer.stop()
+        try:
+            self.timer.stop()
+        except:
+            pass
         self.session.nav.stopService()
+        print "Played %d" % self.PercentagePlayed
+        if config.plugins.AdvancedFreePlayer.DeleteFileQuestion.value == True or self.PercentagePlayed >= config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed.value:
+            def ExitRet(ret):
+                if ret:
+                    myDir = path.dirname(self.openmovie)
+                    filelist = [ f for f in listdir(myDir) if f.startswith(getNameWithoutExtension(path.basename(self.openmovie))) ]
+                    for f in filelist:
+                        printDEBUG("Deleting %s" % f)
+
+            self.session.openWithCallback(ExitRet, MessageBox, _("Delete this movie?"), timeout=10, default=False)
+
         self.close()
 
+########## MOVE SUBTITLES UP/DOWN >>>>>>>>>>
+    def updateSubtitlePosition(self, fotpos):
+        self.fontpos = self.fontpos + fotpos
+        #print "pos y = ",self.fontpos
+        self.setTextForAllLInes(_("Line1\nLine2\nLine3"))
+
+    def MoveSubsUp(self):
+        if self.stateinfo == self.HIDDEN:
+            self.updateSubtitlePosition(-5)
+        else:
+            self.updateOSDPosition(0, -5)
+
+    def MoveSubsDown(self):
+        if self.stateinfo == self.HIDDEN:
+            self.updateSubtitlePosition(+5)
+        else:
+            self.updateOSDPosition(0, +5)
+########## MOVE SUBTITLES UP/DOWN <<<<<<<<<<
 
 class AdvancedFreePlayerStart(Screen):
 
@@ -1089,7 +1121,8 @@ class AdvancedFreePlayerStart(Screen):
         self["Description"] = Label(KeyMapInfo)
         self["Cover"] = Pixmap()
         
-        if path.exists(PluginPath +'../DMnapi/DMnapi.pyo') or path.exists(PluginPath +'../DMnapi/DMnapi.pyc') or path.exists(PluginPath +'../DMnapi/DMnapi.py'):
+        print ExtPluginsPath +'/DMnapi/DMnapi.pyo'
+        if path.exists(ExtPluginsPath + '/DMnapi/DMnapi.pyo') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.pyc') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.py'):
             self.DmnapiInstalled = True
             self["key_green"] = StaticText(_("DMnapi"))
         else:
@@ -1099,7 +1132,7 @@ class AdvancedFreePlayerStart(Screen):
         self["key_yellow"] = StaticText(_("Config"))
         self["key_blue"] = StaticText(_("Sort by name"))
         self["info"].setText(PluginName + ' ' + PluginInfo)
-        self.filelist = FileList(config.plugins.AdvancedFreePlayer.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi$|txt$|srt$|mpg$|vob$|divx$|m4v$|mkv$|mp4$|dat$|mov$|ts$)(?!\.cuts)",sortDate=False)
+        self.filelist = FileList(config.plugins.AdvancedFreePlayer.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi|txt|srt|mpg|vob|divx|m4v|mkv|mp4|dat|mov|ts)(?!\.(cuts|ap$|meta$|sc$))",sortDate=False)
         self["filelist"] = self.filelist
         self["actions"] = ActionMap(["AdvancedFreePlayerSelector"],
             {
@@ -1153,6 +1186,7 @@ class AdvancedFreePlayerStart(Screen):
             from Screens.ChoiceBox import ChoiceBox
             self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),])
         else:
+            self.rootID = config.plugins.AdvancedFreePlayer.MultiFramework.value
             self.StartPlayer()
 
     def SelectedFramework(self, ret):
@@ -1165,7 +1199,21 @@ class AdvancedFreePlayerStart(Screen):
         if not path.exists(self.opensubtitle):
             self.opensubtitle = ""
         if path.exists(self.openmovie):
-            self.session.open(AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
+            if config.plugins.AdvancedFreePlayer.SRTplayer.value =="system":
+                self.session.open(AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService)
+                return
+            else:
+                if getNameWithoutExtension(self.openmovie) == getNameWithoutExtension(self.opensubtitle) and self.opensubtitle.endswith('.srt'):
+                  if path.exists('/tmp/' + path.basename(self.openmovie)):
+                      remove('/tmp/' + path.basename(self.openmovie))
+                  symlink(self.openmovie, '/tmp/' + path.basename(self.openmovie))
+                  self.session.open(AdvancedFreePlayer,'/tmp/' + path.basename(self.openmovie),self.opensubtitle,self.rootID,self.LastPlayedService)
+                  if path.exists('/tmp/' + path.basename(self.openmovie)):
+                      remove('/tmp/' + path.basename(self.openmovie))
+                  return
+                else:
+                  self.session.open(AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
+                  return
 
     def runDMnapi(self):
         if self.DmnapiInstalled == True:
@@ -1222,13 +1270,13 @@ class AdvancedFreePlayerStart(Screen):
             temp = self.getExtension(f)
             #print temp
             if temp == ".srt" or temp == ".txt":
-                if self.DmnapiInstalled == True:
-                    if self.opensubtitle == (d + f): #clear subtitles selection
-                        self["filesubtitle"].setText(self.subtitletxt)
-                        self.opensubtitle = ''
-                    else:
-                        self["filesubtitle"].setText(self.subtitletxt + f)
-                        self.opensubtitle = d + f
+                #if self.DmnapiInstalled == True:
+                if self.opensubtitle == (d + f): #clear subtitles selection
+                    self["filesubtitle"].setText(self.subtitletxt)
+                    self.opensubtitle = ''
+                else:
+                    self["filesubtitle"].setText(self.subtitletxt + f)
+                    self.opensubtitle = d + f
             else:
                 if self.openmovie == (d + f):
                     if config.plugins.AdvancedFreePlayer.KeyOK.value == 'play':
@@ -1238,28 +1286,26 @@ class AdvancedFreePlayerStart(Screen):
                         self.openmovie = ''
                         self["filemovie"].setText(self.movietxt)
                 else:
+                    global PercentagePlayed
+                    PercentagePlayed = 0
                     self.openmovie = d + f
                     self["filemovie"].setText(self.movietxt + f)
                 
                 self.SetDescriptionAndCover(self.openmovie)
                 
-                if self.DmnapiInstalled == True:
-                    temp = f[:-4]
-                    if path.exists( d + temp + ".srt"):
-                        self["filesubtitle"].setText(self.subtitletxt + temp + ".srt")
-                        self.opensubtitle = d + temp + ".srt"
-                    elif path.exists( d + temp + ".txt"):
-                        self["filesubtitle"].setText(self.subtitletxt + temp + ".txt")
-                        self.opensubtitle = d + temp + ".txt"
-                    else:
-                        self["filesubtitle"].setText(self.subtitletxt)
-                        self.opensubtitle = ''
+                #if self.DmnapiInstalled == True:
+                temp = f[:-4]
+                if path.exists( d + temp + ".srt"):
+                    self["filesubtitle"].setText(self.subtitletxt + temp + ".srt")
+                    self.opensubtitle = d + temp + ".srt"
+                elif path.exists( d + temp + ".txt"):
+                    self["filesubtitle"].setText(self.subtitletxt + temp + ".txt")
+                    self.opensubtitle = d + temp + ".txt"
                 else:
+                    self["filesubtitle"].setText(self.subtitletxt)
                     self.opensubtitle = ''
-
-    def getNameWithoutExtension(self, MovieNameWithExtension):
-        extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
-        return MovieNameWithExtension[: -extLenght]
+                #else:
+                #    self.opensubtitle = ''
       
     def getExtension(self, MovieNameWithExtension):
         return path.splitext( path.basename(MovieNameWithExtension) )[1]
@@ -1270,7 +1316,7 @@ class AdvancedFreePlayerStart(Screen):
             self["Description"].setText('')
             return
         
-        temp = self.getNameWithoutExtension(MovieNameWithPath)
+        temp = getNameWithoutExtension(MovieNameWithPath)
         ### COVER ###
         if path.exists(temp + '.jpg'):
             self["Cover"].instance.setScale(1)
@@ -1357,3 +1403,8 @@ class AdvancedFreePlayerStart(Screen):
     def ExitPlayer(self):
         configfile.save()
         self.close()
+
+
+def getNameWithoutExtension(MovieNameWithExtension):
+    extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
+    return MovieNameWithExtension[: -extLenght]

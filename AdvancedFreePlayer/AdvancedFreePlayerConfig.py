@@ -23,8 +23,8 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
     <screen name="AdvancedFreePlayerConfig" position="center,center" size="640,500" title="AdvancedFreePlayer Config" flags="wfNoBorder" backgroundColor="#20606060" >
 
             <widget name="config" position="10,10" size="620,450" zPosition="1" transparent="0" scrollbarMode="showOnDemand" />
-            <widget name="key_green" position="0,465" zPosition="2" size="200,35" valign="center" halign="center" font="Regular;22" transparent="1" foregroundColor="green" />
-            <widget name="key_red" position="220,465" zPosition="2" size="200,35" valign="center" halign="center" font="Regular;22" transparent="1" foregroundColor="red" />
+            <widget name="key_red" position="0,465" zPosition="2" size="200,35" valign="center" halign="center" font="Regular;22" transparent="1" foregroundColor="red" />
+            <widget name="key_green" position="220,465" zPosition="2" size="200,35" valign="center" halign="center" font="Regular;22" transparent="1" foregroundColor="green" />
             <widget name="key_blue" position="440,465" zPosition="2" size="200,35" valign="center" halign="center" font="Regular;22" transparent="1" foregroundColor="#202673ec" />
 
     </screen>"""
@@ -49,16 +49,28 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         self["key_blue"] = Label(_("Update"))
 
         self.list = [ ]
+        config.plugins.AdvancedFreePlayer.separator = NoSave(ConfigNothing())
+        self.list.append(getConfigListEntry(_("--- Standard settings ---"), config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("FileList font size (20-32):"), config.plugins.AdvancedFreePlayer.FileListFontSize))
         self.list.append(getConfigListEntry(_("Stop playing entering AdvancedFreePlayer:"), config.plugins.AdvancedFreePlayer.StopService))
-
         self.list.append(getConfigListEntry(_("Initial movies folder:"), config.plugins.AdvancedFreePlayer.FileListLastFolder))
         self.list.append(getConfigListEntry(_("Remember last used folder:"), config.plugins.AdvancedFreePlayer.StoreLastFolder))
+        self.list.append(getConfigListEntry(_("Key OK behavior:"), config.plugins.AdvancedFreePlayer.KeyOK))
+        self.list.append(getConfigListEntry(_("Ask for file removal when % played:"), config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed))
+        self.list.append(getConfigListEntry(_("Always ask for file removal:"), config.plugins.AdvancedFreePlayer.DeleteFileQuestion))
         
+        self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("--- Infobar settings ---"), config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("Time displaying infobar:"), config.plugins.AdvancedFreePlayer.InfobarTime))
         self.list.append(getConfigListEntry(_("Display infobar on pause:"), config.plugins.AdvancedFreePlayer.InfobarOnPause))
-        self.list.append(getConfigListEntry(_("Key OK behavior:"), config.plugins.AdvancedFreePlayer.KeyOK))
-
+        
+        self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("--- Subtitles settings ---"), config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("SRT subtitles displayed by:"), config.plugins.AdvancedFreePlayer.SRTplayer))
+        
+        self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("--- Advanced settings ---"), config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("Download:"), config.plugins.AdvancedFreePlayer.Version))
         self.list.append(getConfigListEntry(_("MultiFramework selection (sh4 only):"), config.plugins.AdvancedFreePlayer.MultiFramework))
         
         self["config"].list = self.list        
@@ -75,7 +87,7 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
                 runlist = []
                 runlist.append( ('chmod 755 %sPluginUpdate.sh' % PluginPath) )
                 runlist.append( ('cp -a %sPluginUpdate.sh /tmp/PluginUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
-                runlist.append( ('/tmp/PluginUpdate.sh') )
+                runlist.append( ('/tmp/PluginUpdate.sh %s "%s"' % (config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
                 self.session.openWithCallback(doNothing, AdvancedFreePlayerConsole, title = _("Updating plugin"), cmdlist = runlist)
                 return
         self.session.openWithCallback(goUpdate, MessageBox,_("Do you want to update plugin?"),  type = MessageBox.TYPE_YESNO, timeout = 10, default = False)

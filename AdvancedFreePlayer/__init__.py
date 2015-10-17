@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-PluginInfo='@j00zek 13/10/2015'
+PluginInfo='@j00zek 16/10/2015'
 
 #permanent
 PluginName = 'AdvancedFreePlayer'
@@ -9,6 +9,7 @@ PluginGroup = 'Extensions'
 from Tools.Directories import resolveFilename, SCOPE_CURRENT_SKIN, SCOPE_PLUGINS
 PluginFolder = PluginName
 PluginPath = resolveFilename(SCOPE_PLUGINS, '%s/%s/' %(PluginGroup,PluginFolder))
+ExtPluginsPath = resolveFilename(SCOPE_PLUGINS, '%s/' %(PluginGroup))
 
 #Current skin
 from Components.config import *

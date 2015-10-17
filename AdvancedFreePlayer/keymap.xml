@@ -2,46 +2,47 @@
 
   <map context="AdvancedFreePlayer">
     <!-- openPLI PC , keyboard -->
-    <key id="KEY_ESC" mapto="cancel" flags="m" />
+    <key id="KEY_ESC" mapto="ExitPlayer" flags="m" />
+    <key id="KEY_EXIT" mapto="ExitPlayer" flags="m" />
+    <key id="KEY_HOME" mapto="ExitPlayer" flags="m" />
     <key id="KEY_HELP" mapto="HelpScreen" flags="b" />      
     <key id="KEY_INFO" mapto="HelpScreen" flags="b" />
+    <key id="KEY_MENU" mapto="HelpScreen" flags="b" />
     
     <key id="KEY_OK" mapto="ToggleInfobar" flags="m" />
-			<key id="KEY_EXIT" mapto="cancel" flags="m" />
-			<key id="KEY_HOME" mapto="cancel" flags="m" />
-			<key id="KEY_UP" mapto="up" flags="m" />
-			<key id="KEY_DOWN" mapto="down" flags="m" />
-			<key id="KEY_LEFT" mapto="left" flags="m" />
-			<key id="KEY_RIGHT" mapto="right" flags="m" />
-			
-    <key id="KEY_RED" mapto="play" flags="m" />
-    <key id="KEY_GREEN" mapto="togglePause" flags="m" />
-			<key id="KEY_YELLOW" mapto="yellow" flags="m" />
-			<key id="KEY_BLUE" mapto="blue" flags="m" />
+    <key id="KEY_UP" mapto="MoveSubsUp" flags="m" />
+    <key id="KEY_DOWN" mapto="MoveSubsDown" flags="m" />
+    <key id="KEY_LEFT" mapto="SetSmallerFont" flags="m" />
+    <key id="KEY_RIGHT" mapto="SetBiggerFont" flags="m" />
 
-    <key id="KEY_PLAY" mapto="play" flags="m" />
-			<key id="KEY_PAUSE" mapto="pause" flags="m" />
-			<key id="KEY_STOP" mapto="stop" flags="m" />
-			
+    <key id="KEY_RED" mapto="togglePause" flags="m" />
+    <key id="KEY_GREEN" mapto="toggleFontBackground" flags="m" />
+    <key id="KEY_YELLOW" mapto="ToggleFont" flags="m" />
+    <key id="KEY_BLUE" mapto="ToggleFontColor" flags="m" />
 
-			<key id="KEY_1" mapto="key1" flags="m" />
-			<key id="KEY_2" mapto="key2" flags="m" />
-			<key id="KEY_3" mapto="key3" flags="m" />
-			<key id="KEY_4" mapto="key4" flags="m" />
-			<key id="KEY_5" mapto="key5" flags="m" />
-			<key id="KEY_6" mapto="key6" flags="m" />
-			<key id="KEY_7" mapto="key7" flags="m" />
-			<key id="KEY_8" mapto="key8" flags="m" />
-			<key id="KEY_9" mapto="key9" flags="m" />
-			<key id="KEY_0" mapto="key0" flags="m" />
+    <key id="KEY_PLAY" mapto="togglePause" flags="m" />
+    <key id="KEY_PAUSE" mapto="togglePause" flags="m" />
+    <key id="KEY_STOP" mapto="ExitPlayer" flags="m" />
 
-			<key id="KEY_CHANNELUP" mapto="channelup" flags="m" />
-			<key id="KEY_CHANNELDOWN" mapto="channeldown" flags="m" />
-			<key id="KEY_PAGEUP" mapto="channelup" flags="m" />
-			<key id="KEY_PAGEDOWN" mapto="channeldown" flags="m" />
+    <key id="KEY_1" mapto="BackF30s" flags="m" />
+			<!--key id="KEY_2" mapto="key2" flags="m" /-->
+    <key id="KEY_3" mapto="FastF30s" flags="m" />
+    <key id="KEY_4" mapto="BackF120s" flags="m" />
+			<!--key id="KEY_5" mapto="key5" flags="m" /-->
+    <key id="KEY_6" mapto="FastF120s" flags="m" />
+    <key id="KEY_7" mapto="BackF300s" flags="m" />
+			<!--key id="KEY_8" mapto="key8" flags="m" /-->
+    <key id="KEY_9" mapto="FastF300s" flags="m" />
+			<!--key id="KEY_0" mapto="key0" flags="m" /-->
 
-			<key id="KEY_TEXT" mapto="text" flags="m" />
-			<key id="KEY_AUDIO" mapto="audio" flags="m" />
+    <key id="KEY_CHANNELUP" mapto="SeekUpSubtitles" flags="m" />
+    <key id="KEY_PAGEUP" mapto="SeekUpSubtitles" flags="m" />
+    <key id="KEY_CHANNELDOWN" mapto="SeekDownSubtitles" flags="m" />
+    <key id="KEY_PAGEDOWN" mapto="SeekDownSubtitles" flags="m" />
+
+    <key id="KEY_TV" mapto="ToggleSubtitles" flags="m" />
+    <key id="KEY_TEXT" mapto="ToggleSubtitles" flags="m" />
+    <key id="KEY_AUDIO" mapto="audioSelected" flags="m" />
 
   </map>
 	
@@ -55,6 +56,7 @@
     <key id="KEY_RED" mapto="PlayMovie" flags="m" />
     <key id="KEY_GREEN" mapto="runDMnapi" flags="m" />
     <key id="KEY_YELLOW" mapto="runConfig" flags="m" />
+    <key id="KEY_MENU" mapto="runConfig" flags="b" />
     <key id="KEY_BLUE" mapto="setSort" flags="m" />
     <key id="KEY_UP" mapto="lineUp" flags="m" />
     <key id="KEY_DOWN" mapto="lineDown" flags="m" />
