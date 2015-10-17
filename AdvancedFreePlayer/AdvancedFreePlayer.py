@@ -29,13 +29,13 @@ from FileList2 import FileList
 import subprocess,fcntl,os
 
 config.plugins.AdvancedFreePlayer = ConfigSubsection()
-config.plugins.AdvancedFreePlayer.FileListFontSize = ConfigInteger(24, (20,32))
+config.plugins.AdvancedFreePlayer.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
 config.plugins.AdvancedFreePlayer.MultiFramework = ConfigSelection(default = "4097", choices = [("4097", "gstreamer (root 4097)"),("4099", "ffmpeg (root 4099)"), ("select", _("Select during start"))])
 config.plugins.AdvancedFreePlayer.StopService = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.InfobarTime = ConfigInteger(5, (2,9))
+config.plugins.AdvancedFreePlayer.InfobarTime = ConfigSelectionNumber(2, 9, 1, default = 5)
 config.plugins.AdvancedFreePlayer.InfobarOnPause = ConfigYesNo(default = True)
 config.plugins.AdvancedFreePlayer.DeleteFileQuestion = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed = ConfigInteger(1, (0,100))
+config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed = ConfigSelectionNumber(0, 100, 5, default = 80)
 config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
 config.plugins.AdvancedFreePlayer.SRTplayer = ConfigSelection(default = "system", choices = [("system", _("System")),("plugin", _("Plugin"))])
 config.plugins.AdvancedFreePlayer.TXTplayer = ConfigSelection(default = "plugin", choices = [("convert", _("System after conversion to srt")),("plugin", _("Plugin"))])
@@ -193,7 +193,7 @@ class AdvancedFreePlayer(Screen):
             self.LastPlayedService = self.session.nav.getCurrentlyPlayingServiceReference()
             self.session.nav.stopService()
         self.session.nav.stopService()
-        self.autoHideTime = 1000 * config.plugins.AdvancedFreePlayer.InfobarTime.value
+        self.autoHideTime = 1000 * int(config.plugins.AdvancedFreePlayer.InfobarTime.value)
         self.hideOSDTimer = eTimer()
         self.hideOSDTimer.callback.append(self.ToggleInfobar)
         self.hideOSDTimer.start(self.autoHideTime, True) # singleshot
@@ -1036,7 +1036,7 @@ class AdvancedFreePlayer(Screen):
             pass
         self.session.nav.stopService()
         print "Played %d" % self.PercentagePlayed
-        if config.plugins.AdvancedFreePlayer.DeleteFileQuestion.value == True or self.PercentagePlayed >= config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed.value:
+        if config.plugins.AdvancedFreePlayer.DeleteFileQuestion.value == True or self.PercentagePlayed >= int(config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed.value):
             def ExitRet(ret):
                 if ret:
                     myDir = path.dirname(self.openmovie)

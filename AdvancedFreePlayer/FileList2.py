@@ -75,7 +75,7 @@ class FileList(MenuList):
 
         self.refreshMountpoints()
         self.changeDir(directory)
-        self.l.setFont(0, gFont("Regular", config.plugins.AdvancedFreePlayer.FileListFontSize.value))
+        self.l.setFont(0, gFont("Regular", int(config.plugins.AdvancedFreePlayer.FileListFontSize.value)))
         self.l.setItemHeight(35)
         self.serviceHandler = eServiceCenter.getInstance()
 
