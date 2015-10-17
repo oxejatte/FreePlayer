@@ -1,4 +1,15 @@
 #
+if [ -z "$1" ];then
+  UpdateType='public'
+else
+  UpdateType=$1
+fi
+if [ -z "$2" ];then
+  CurrentPublic='no-version'
+else
+  CurrentPublic=$2
+fi
+
 [ -e /tmp/AFP.tar.gz ] && rm -rf /tmp/AFP.tar.gz
 rm -rf /tmp/j00zek-FreePlayer-* 2>/dev/null
 sudo rm -rf /tmp/j00zek-FreePlayer-* 2>/dev/null
@@ -27,6 +38,20 @@ ping -c 1 github.com 1>/dev/null 2>%1
 if [ $? -gt 0 ]; then
   echo "_(github server unavailable, update impossible!!!)"
   exit 0
+fi
+
+if [ "$UpdateType" == "public" ]; then
+  echo "_(Checking web version...)"
+  GITversion=`curl -kLs https://raw.githubusercontent.com/j00zek/FreePlayer/master/AdvancedFreePlayer/__init__.py|grep PluginInfo|cut -d "'" -f2`
+  if [ -z "$GITversion" ]; then
+    echo "_(Error checking web version)"
+    exit 0
+  elif [ "$GITversion" == "$CurrentPublic" ]; then
+    echo "_(Latest version already installed)"
+    exit 0
+  else
+    echo "_(Vew version available on the web)"
+  fi
 fi
 
 echo "_(Downloading latest plugin version...)"
