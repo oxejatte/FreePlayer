@@ -1028,24 +1028,44 @@ class AdvancedFreePlayerStart(Screen):
         self.StartPlayer()
       
     def StartPlayer(self):
+        lastOPLIsetting = None
+        lastDMNAPIsetting = None
+        def EndPlayer():
+            if lastOPLIsetting is not None:
+                config.subtitles.pango_autoturnon.valu = lastOPLIsetting
+            if lastDMNAPIsetting is not None:
+                config.plugins.dmnapi.autosrton.value = lastDMNAPIsetting
+                
         if not path.exists(self.opensubtitle):
             self.opensubtitle = ""
         if path.exists(self.openmovie):
             if config.plugins.AdvancedFreePlayer.SRTplayer.value =="system":
-                self.session.open(AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService)
+                try: 
+                    lastOPLIsetting = config.subtitles.pango_autoturnon.value
+                    config.subtitles.pango_autoturnon.value = True
+                except: pass
+                if self.DmnapiInstalled == True:
+                    try:
+                        lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
+                        config.plugins.dmnapi.autosrton.value = True
+                        printDEBUG("DMNapi subtitles enabled")
+                    except: pass
+                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService)
                 return
             else:
-                if getNameWithoutExtension(self.openmovie) == getNameWithoutExtension(self.opensubtitle) and self.opensubtitle.endswith('.srt'):
-                  if path.exists('/tmp/' + path.basename(self.openmovie)):
-                      remove('/tmp/' + path.basename(self.openmovie))
-                  symlink(self.openmovie, '/tmp/' + path.basename(self.openmovie))
-                  self.session.open(AdvancedFreePlayer,'/tmp/' + path.basename(self.openmovie),self.opensubtitle,self.rootID,self.LastPlayedService)
-                  if path.exists('/tmp/' + path.basename(self.openmovie)):
-                      remove('/tmp/' + path.basename(self.openmovie))
-                  return
-                else:
-                  self.session.open(AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
-                  return
+                try: 
+                    lastOPLIsetting = config.subtitles.pango_autoturnon.value
+                    config.subtitles.pango_autoturnon.value = False
+                    printDEBUG("OpenPLI subtitles disabled")
+                except: printDEBUG("pango_autoturnon non existent, is it VTI?")
+                if self.DmnapiInstalled == True:
+                    try:
+                        lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
+                        config.plugins.dmnapi.autosrton.value = False
+                        printDEBUG("DMNapi subtitles disabled")
+                    except: pass
+                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
+                return
 
     def runDMnapi(self):
         if self.DmnapiInstalled == True:
