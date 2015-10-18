@@ -19,7 +19,7 @@ from Components.Converter.ConditionalShowHide import ConditionalShowHide
 from Tools.LoadPixmap import LoadPixmap
 from os import path, remove, listdir, symlink
 
-from enigma import eTimer,ePoint,eSize,gFont,eConsoleAppContainer,iServiceInformation,eServiceReference, addFont, getDesktop, iPlayableService
+from enigma import eTimer,ePoint,eSize,gFont,eConsoleAppContainer,iServiceInformation,eServiceReference, addFont, getDesktop, iPlayableService, fontRenderClass
 
 from skin import parseColor,parseFont
 
@@ -916,10 +916,14 @@ class AdvancedFreePlayer(Screen):
                         textWidth = tempLen 
             for fontLine in self.fontLines:
                 self[fontLine].setText(text)
-                textWidth *= self.fontsize
+                
+                                
+                textWidth *= int(self.fontsize * 0.75) # The best would be to calculate real width, but don't know how to do it. :(
                 center = int( (self.currentWidth - textWidth) /2 )
-                self[fontLine].instance.resize(eSize(textWidth, linesNO * self.fontsize + self.fontsize/2) )
+                self[fontLine].instance.resize(eSize(textWidth, linesNO * int(fontRenderClass.getInstance().getLineHeight(self[fontLine].instance.getFont())) ) )
+
                 self[fontLine].instance.move(ePoint(center, self.fontpos ) )
+                
                 self[fontLine].show()
 
     def setVisible(self, visible, component):
