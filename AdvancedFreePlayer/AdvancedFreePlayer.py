@@ -26,7 +26,7 @@ from skin import parseColor,parseFont
 from time import *
 from FileList2 import FileList
 
-import subprocess,fcntl,os
+import subprocess,fcntl
 
 config.plugins.AdvancedFreePlayer = ConfigSubsection()
 config.plugins.AdvancedFreePlayer.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
@@ -160,7 +160,7 @@ class AdvancedFreePlayer(Screen):
         isDolby = False
         self.skin = """
 <screen name="AdvancedFreePlayer" position="0,0" size="1280,720" title="InfoBar" backgroundColor="transparent" flags="wfNoBorder">
-    <!-- SubTiles -->
+    <!-- SubTitles -->
     <widget name="afpSubtitles" position="0,0" size="1,1" valign="center" halign="center" font="Regular;60" backgroundColor="#ff000000" transparent="0" />
   </screen>"""
         Screen.__init__(self, session)
@@ -199,15 +199,6 @@ class AdvancedFreePlayer(Screen):
             self.LastPlayedService = self.session.nav.getCurrentlyPlayingServiceReference()
             self.session.nav.stopService()
         self.session.nav.stopService()
-
-    def getIconPtr(self, IconName):
-        if path.exists('%sicons/%s' % (SkinPath,IconName)):
-            myPath = '%sicons/%s' % (SkinPath,IconName)
-        else:
-            myPath = '%spic/%s' % (PluginPath, IconName)
-        #printDEBUG(myPath)
-        IconPtr = LoadPixmap(cached=True,path=myPath ) 
-        return IconPtr
 
     def __onClose(self):
         config.plugins.AdvancedFreePlayer.Inits.value = str(self.fontpos) + "," + str(self.fontsize) + "," + \
@@ -298,7 +289,7 @@ class AdvancedFreePlayer(Screen):
         fonts_paths =[ "/usr/share/fonts/" , PluginPath + "fonts/"]
         for font_path in fonts_paths:
             if path.exists(font_path):
-                for file in os.listdir(font_path):
+                for file in listdir(font_path):
                     if file.lower().endswith(".ttf") and file not in fonts:
                         fonts.append( (font_path + '/' + file, file))
                         addFont(font_path + '/' + file, file, 100, False)
@@ -307,16 +298,17 @@ class AdvancedFreePlayer(Screen):
             self.fonttype_list.append(font[1])  
 
     def loadcolor(self):
-        o = open(PluginPath + 'color.ini','r')
         self.fontcolor_list = []
         self.fontcolor_list.append("white")
-        while True:
-            l = o.readline()
-            if len(l) == 0: break
-            l = l.strip()
-            #print l
-            self.fontcolor_list.append(l)
-        o.close()
+        if path.exists(PluginPath + 'colors.ini'):
+            o = open(PluginPath + 'colors.ini','r')
+            while True:
+                l = o.readline()
+                if len(l) == 0: break
+                l = l.strip()
+                #print l
+                self.fontcolor_list.append(l)
+            o.close()
 
     def loadBackgroundColor(self):
         self.backgroundcolor_list = []
@@ -1075,6 +1067,7 @@ class AdvancedFreePlayerStart(Screen):
     def runConfig(self):
         from AdvancedFreePlayerConfig import AdvancedFreePlayerConfig
         self.session.open(AdvancedFreePlayerConfig)
+        return
 
     def setSort(self):
         if self.sortDate:
@@ -1102,6 +1095,7 @@ class AdvancedFreePlayerStart(Screen):
                     printDEBUG("Exception loading DMnapi!!!")
             else:
                 self.session.open(MessageBox,_("Please select movie files !\n\n"),MessageBox.TYPE_INFO)
+                return
 
     def dmnapiCallback(self, answer=False):
         self["filelist"].refresh()

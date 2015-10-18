@@ -1,13 +1,13 @@
 <screen name="AdvancedFreePlayerInfobar" position="0,0" size="1280,720" title="InfoBar" backgroundColor="transparent" flags="wfNoBorder">
-                <eLabel position="210,535" size="880,165" zPosition="-15" backgroundColor="tile_back" />
-                <eLabel position="1010,555" size="60,60" zPosition="-10" backgroundColor="tile_info0" />
-                <eLabel position="230,620" size="580,60" zPosition="-10" backgroundColor="tile_epg1" />
-                <eLabel position="815,620" size="60,60" zPosition="-10" backgroundColor="tile_menu1" />
-                <eLabel position="880,555" size="60,60" zPosition="-10" backgroundColor="tile_info0" />
-                <eLabel position="815,555" size="60,60" zPosition="-10" backgroundColor="tile_menu2" />
-                <eLabel position="880,620" size="60,60" zPosition="-10" backgroundColor="tile_info1" />
-                <eLabel position="945,555" size="60,60" zPosition="-10" backgroundColor="tile_info0" />
-                <eLabel position="230,555" size="580,60" zPosition="-10" backgroundColor="tile_epg0" />
+                <eLabel position="210,535" size="880,165" zPosition="-15" backgroundColor="#20000000" />
+                <eLabel position="1010,555" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="230,620" size="580,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="815,620" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="880,555" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="815,555" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="880,620" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="945,555" size="60,60" zPosition="-10" backgroundColor="#20606060" />
+                <eLabel position="230,555" size="580,60" zPosition="-10" backgroundColor="#20606060" />
                 <eLabel position="945,620" size="125,60" zPosition="-10" backgroundColor="tile_clock0" />
                 <!--widget source="session.CurrentService" render="Cover" position="80,450" size="125,165" zPosition="5" alphatest="blend" /-->
                 <!--widget source="session.CurrentService" render="Picon" position="80,625" size="125,75" zPosition="5" alphatest="blend">
@@ -64,7 +64,7 @@
                 <widget source="session.RecordState" render="FixedLabel" text="REC" position="815,620" size="60,60" zPosition="2" font="Regular; 24" valign="center" halign="center" foregroundColor="foreground" backgroundColor="background" transparent="1">
                         <convert type="ConditionalShowHide" />
                 </widget>
-                <widget source="session.RecordState" render="FixedLabel" position="815,620" size="60,60" zPosition="3" valign="center" halign="center" text=" " backgroundColor="tile_rec">
+                <widget source="session.RecordState" render="FixedLabel" position="815,620" size="60,60" zPosition="3" valign="center" halign="center" text=" " backgroundColor="#20606060">
                         <convert type="ConfigEntryTest">config.usage.blinking_rec_symbol_during_recording,True,CheckSourceBoolean</convert>
                         <convert type="ConditionalShowHide">Blink</convert>
                 </widget>
