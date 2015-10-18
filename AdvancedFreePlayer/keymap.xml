@@ -1,5 +1,4 @@
 <keymap>
-
   <map context="AdvancedFreePlayer">
     <!-- openPLI PC , keyboard -->
     <key id="KEY_ESC" mapto="ExitPlayer" flags="m" />
@@ -46,7 +45,6 @@
 
   </map>
 	
-	
   <map context="AdvancedFreePlayerSelector">
     <key id="KEY_OK" mapto="selectFile" flags="m" />
     <key id="KEY_EXIT" mapto="ExitPlayer" flags="m" />
@@ -64,5 +62,18 @@
     <key id="KEY_RIGHT" mapto="pageDown" flags="m" />
     <key id="KEY_PAGEUP" mapto="pageUp" flags="m" />
     <key id="KEY_PAGEDOWN" mapto="pageDown" flags="m" />
+  </map>
+  
+  <map context="AdvancedFreePlayerInfobar">
+    <key id="KEY_ESC" mapto="CloseInfobar" flags="m" />
+    <key id="KEY_EXIT" mapto="CloseInfobar" flags="m" />
+    <key id="KEY_HOME" mapto="CloseInfobar" flags="m" />
+    <key id="KEY_OK" mapto="CloseInfobar" flags="m" />
+  </map>
+  
+  <map context="AdvancedFreePlayerPauseInfobar">
+    <key id="KEY_RED" mapto="unPause" flags="m" />
+    <key id="KEY_PLAY" mapto="unPause" flags="m" />
+    <key id="KEY_PAUSE" mapto="unPause" flags="m" />
   </map>
 </keymap>
