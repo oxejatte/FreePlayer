@@ -281,7 +281,7 @@ class AdvancedFreePlayer(Screen):
         self.SubtitleLineHeight = int(fontRenderClass.getInstance().getLineHeight(self["afpSubtitles"].instance.getFont()))
         if self.SubtitleLineHeight > self.fontsize:
             printDEBUG("SubtitleLineHeight calculated: %d" % self.SubtitleLineHeight)
-        else
+        else:
             self.SubtitleLineHeight = int(self.fontsize * 1.1)
             printDEBUG("SubtitleLineHeight assumed: %d" % self.SubtitleLineHeight)
         self.ToggleInfobar()
