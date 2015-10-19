@@ -191,7 +191,7 @@ class AdvancedFreePlayer(Screen):
                 "ToggleFont": self.ToggleFont,
                 "ToggleFontColor": self.ToggleFontColor,
                 "ToggleSubtitles": self.ToggleSubtitles,
-                "audioSelected": self.audioSelected,
+                "SelectAudio": self.SelectAudio,
             },-2)
         self.onShown.append(self.__LayoutFinish)
         self.onClose.append(self.__onClose)
