@@ -29,23 +29,24 @@ from FileList2 import FileList
 import subprocess,fcntl
 
 config.plugins.AdvancedFreePlayer = ConfigSubsection()
-config.plugins.AdvancedFreePlayer.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
-config.plugins.AdvancedFreePlayer.MultiFramework = ConfigSelection(default = "4097", choices = [("4097", "gstreamer (root 4097)"),("4099", "ffmpeg (root 4099)"), ("select", _("Select during start"))])
-config.plugins.AdvancedFreePlayer.StopService = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.InfobarTime = ConfigSelectionNumber(2, 9, 1, default = 5)
-config.plugins.AdvancedFreePlayer.InfobarOnPause = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.DeleteFileQuestion = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed = ConfigSelectionNumber(0, 100, 5, default = 80)
-config.plugins.AdvancedFreePlayer.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
-config.plugins.AdvancedFreePlayer.SRTplayer = ConfigSelection(default = "system", choices = [("system", _("System")),("plugin", _("Plugin"))])
-config.plugins.AdvancedFreePlayer.TXTplayer = ConfigSelection(default = "plugin", choices = [("convert", _("System after conversion to srt")),("plugin", _("Plugin"))])
-config.plugins.AdvancedFreePlayer.Version = ConfigSelection(default = "public", choices = [("debug", _("every new version (debug)")),("public", _("only checked versions"))])
+myConfig = config.plugins.AdvancedFreePlayer
+myConfig.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
+myConfig.MultiFramework = ConfigSelection(default = "4097", choices = [("4097", "gstreamer (root 4097)"),("4099", "ffmpeg (root 4099)"), ("select", _("Select during start"))])
+myConfig.StopService = ConfigYesNo(default = True)
+myConfig.InfobarTime = ConfigSelectionNumber(2, 9, 1, default = 5)
+myConfig.InfobarOnPause = ConfigYesNo(default = True)
+myConfig.DeleteFileQuestion = ConfigYesNo(default = True)
+myConfig.DeleteWhenPercentagePlayed = ConfigSelectionNumber(0, 100, 5, default = 80)
+myConfig.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _("Select/Unselect")),("play", _("Select>Play"))])
+myConfig.SRTplayer = ConfigSelection(default = "system", choices = [("system", _("System")),("plugin", _("Plugin"))])
+myConfig.TXTplayer = ConfigSelection(default = "plugin", choices = [("convert", _("System after conversion to srt")),("plugin", _("Plugin"))])
+myConfig.Version = ConfigSelection(default = "public", choices = [("debug", _("every new version (debug)")),("public", _("only checked versions"))])
 #
 # hidden atributes to store configuration data
 #
-config.plugins.AdvancedFreePlayer.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
-config.plugins.AdvancedFreePlayer.StoreLastFolder = ConfigYesNo(default = True)
-config.plugins.AdvancedFreePlayer.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
+myConfig.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
+myConfig.StoreLastFolder = ConfigYesNo(default = True)
+myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
 #position,size,type,color,visibility,background
 
 KeyMapInfo=_("Player KEYMAP:\n\n\
@@ -91,7 +92,7 @@ class AdvancedFreePlayerInfobar(Screen):
             self.onShown.append(self.__PauseLayoutFinish)
         
     def __LayoutFinish(self):
-        self.autoHideTime = 1000 * int(config.plugins.AdvancedFreePlayer.InfobarTime.value)
+        self.autoHideTime = 1000 * int(myConfig.InfobarTime.value)
         self.hideOSDTimer = eTimer()
         self.hideOSDTimer.callback.append(self.CloseInfobar)
         self.hideOSDTimer.start(self.autoHideTime, True) # singleshot
@@ -201,10 +202,10 @@ class AdvancedFreePlayer(Screen):
         self.session.nav.stopService()
 
     def __onClose(self):
-        config.plugins.AdvancedFreePlayer.Inits.value = str(self.fontpos) + "," + str(self.fontsize) + "," + \
+        myConfig.Inits.value = str(self.fontpos) + "," + str(self.fontsize) + "," + \
                                                         str(self.fonttype_list[self.fonttype_nr]) + "," + str(self.fontcolor_nr) + "," + \
                                                         str(self.fontBackgroundState) + "," + str(self.fontbackground_nr)
-        config.plugins.AdvancedFreePlayer.Inits.save()
+        myConfig.Inits.save()
 
         if self.LastPlayedService:
             self.session.nav.playService(self.LastPlayedService)
@@ -324,7 +325,7 @@ class AdvancedFreePlayer(Screen):
 
     def loadconfig(self):
         try:
-            configs=config.plugins.AdvancedFreePlayer.Inits.value.split(',')
+            configs=myConfig.Inits.value.split(',')
         except:
             return
             
@@ -372,11 +373,12 @@ class AdvancedFreePlayer(Screen):
                     printDEBUG ("%d Hide %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
 
     def usun(self,l):
-        if l[0] == "{":
-            p = l.find("}")
-            if p != -1:
-                l = l[p+1:]
-                return l
+        if len(l) > 0:
+            if l[0] == "{":
+                p = l.find("}")
+                if p != -1:
+                    l = l[p+1:]
+                    return l
         return l
 
     def loadsubtitle(self):
@@ -648,17 +650,15 @@ class AdvancedFreePlayer(Screen):
                     self.subtitle.append([int(nr),tim_1,tim_2,l])
                 o.close()
         except Exception as e:
+            if myConfig.Version == "debug":
+                raise
             self.subtitle = []
-            #print "Error loadsrt"
-            #print str(e)
             printDEBUG("Error loadsrt %s" % str(e) )
             try:
                 o.close()
             except:
                 pass
             self.session.open(MessageBox,"Error load subtitle !!!",  MessageBox.TYPE_ERROR, timeout=5)
-        #for aqq in self.subtitle:
-        #    printDEBUG( '%d %s %s %s' % (aqq[0],aqq[1],aqq[2], aqq[3]) )
 
     def __getSeekable(self):
         service = self.session.nav.getCurrentService()
@@ -812,7 +812,7 @@ class AdvancedFreePlayer(Screen):
             pass
         self.session.nav.stopService()
         print "Played %d" % self.PercentagePlayed
-        if config.plugins.AdvancedFreePlayer.DeleteFileQuestion.value == True or self.PercentagePlayed >= int(config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed.value):
+        if myConfig.DeleteFileQuestion.value == True or self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value):
             def ExitRet(ret):
                 if ret:
                     myDir = path.dirname(self.openmovie)
@@ -892,7 +892,7 @@ class AdvancedFreePlayer(Screen):
             return
         pauseable.pause()
         self.stateplay = "Pause"
-        if config.plugins.AdvancedFreePlayer.InfobarOnPause.value == True:
+        if myConfig.InfobarOnPause.value == True:
             self.session.openWithCallback(self.play,AdvancedFreePlayerInfobar,isPause = True)
             return
 
@@ -930,14 +930,14 @@ class AdvancedFreePlayerStart(Screen):
         self.opensubtitle = "aqq"
         self.movietxt = _('Movie: ')
         self.subtitletxt = _('Subtitle: ')
-        self.rootID = config.plugins.AdvancedFreePlayer.MultiFramework.value
+        self.rootID = myConfig.MultiFramework.value
         self.LastPlayedService = None
   
         self.skin  = LoadSkin("AdvancedFreePlayerStart")
         
         Screen.__init__(self, session)
         self["info"] = Label()
-        self["myPath"] = Label(config.plugins.AdvancedFreePlayer.FileListLastFolder.value)
+        self["myPath"] = Label(myConfig.FileListLastFolder.value)
         
         self["filemovie"] = Label(self.movietxt)
         self["filesubtitle"] = Label(self.subtitletxt)
@@ -956,7 +956,7 @@ class AdvancedFreePlayerStart(Screen):
         self["key_yellow"] = StaticText(_("Config"))
         self["key_blue"] = StaticText(_("Sort by name"))
         self["info"].setText(PluginName + ' ' + PluginInfo)
-        self.filelist = FileList(config.plugins.AdvancedFreePlayer.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi|txt|srt|mpg|vob|divx|m4v|mkv|mp4|dat|mov|ts)(?!\.(cuts|ap$|meta$|sc$))",sortDate=False)
+        self.filelist = FileList(myConfig.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi|txt|srt|mpg|vob|divx|m4v|mkv|mp4|dat|mov|ts)(?!\.(cuts|ap$|meta$|sc$))",sortDate=False)
         self["filelist"] = self.filelist
         self["actions"] = ActionMap(["AdvancedFreePlayerSelector"],
             {
@@ -972,7 +972,7 @@ class AdvancedFreePlayerStart(Screen):
                 "setSort": self.setSort
             },-2)
         self.setTitle(PluginName + ' ' + PluginInfo)
-        if config.plugins.AdvancedFreePlayer.StopService.value == True:
+        if myConfig.StopService.value == True:
             self.LastPlayedService = self.session.nav.getCurrentlyPlayingServiceReference()
             self.session.nav.stopService()
 
@@ -990,8 +990,8 @@ class AdvancedFreePlayerStart(Screen):
 
     def PlayMovie(self):
         if not self.openmovie == "":
-            config.plugins.AdvancedFreePlayer.FileListLastFolder.value =  self["myPath"].getText()
-            config.plugins.AdvancedFreePlayer.FileListLastFolder.save()
+            myConfig.FileListLastFolder.value =  self["myPath"].getText()
+            myConfig.FileListLastFolder.save()
             print self["myPath"].getText()
             if not path.exists(self.openmovie + '.cuts'):
                 self.SelectFramework()
@@ -1006,11 +1006,11 @@ class AdvancedFreePlayerStart(Screen):
         self.SelectFramework()
 
     def SelectFramework(self):
-        if config.plugins.AdvancedFreePlayer.MultiFramework.value == "select":
+        if myConfig.MultiFramework.value == "select":
             from Screens.ChoiceBox import ChoiceBox
             self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),])
         else:
-            self.rootID = config.plugins.AdvancedFreePlayer.MultiFramework.value
+            self.rootID = myConfig.MultiFramework.value
             self.StartPlayer()
 
     def SelectedFramework(self, ret):
@@ -1031,7 +1031,7 @@ class AdvancedFreePlayerStart(Screen):
         if not path.exists(self.opensubtitle):
             self.opensubtitle = ""
         if path.exists(self.openmovie):
-            if config.plugins.AdvancedFreePlayer.SRTplayer.value =="system":
+            if myConfig.SRTplayer.value =="system":
                 try: 
                     lastOPLIsetting = config.subtitles.pango_autoturnon.value
                     config.subtitles.pango_autoturnon.value = True
@@ -1125,7 +1125,7 @@ class AdvancedFreePlayerStart(Screen):
                     self.opensubtitle = d + f
             else:
                 if self.openmovie == (d + f):
-                    if config.plugins.AdvancedFreePlayer.KeyOK.value == 'play':
+                    if myConfig.KeyOK.value == 'play':
                         self.PlayMovie()
                         return
                     else:
