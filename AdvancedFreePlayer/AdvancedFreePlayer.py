@@ -133,7 +133,7 @@ class AdvancedFreePlayer(Screen):
         self.subtitle = []
         self.fontpos = 540
         self.fontsize = 60
-        self.SubtitleLineHeight=0
+        self.SubtitleLineHeight=66
         self.fontpos_ = self.fontpos
         self.osdPosX = 0
         self.osdPosY = 0
@@ -277,7 +277,13 @@ class AdvancedFreePlayer(Screen):
         self["afpSubtitles"].instance.move(ePoint(0,self.fontpos))
         self["afpSubtitles"].instance.setForegroundColor(parseColor(self.fontcolor_list[self.fontcolor_nr]))
         self["afpSubtitles"].instance.setBackgroundColor(parseColor(self.backgroundcolor_list[self.fontbackground_nr]))
+        self["afpSubtitles"].instance.setFont(gFont(self.fonttype_list[self.fonttype_nr], self.fontsize))
         self.SubtitleLineHeight = int(fontRenderClass.getInstance().getLineHeight(self["afpSubtitles"].instance.getFont()))
+        if self.SubtitleLineHeight > self.fontsize:
+            printDEBUG("SubtitleLineHeight calculated: %d" % self.SubtitleLineHeight)
+        else
+            self.SubtitleLineHeight = int(self.fontsize * 1.1)
+            printDEBUG("SubtitleLineHeight assumed: %d" % self.SubtitleLineHeight)
         self.ToggleInfobar()
             
         #print "End of go"
