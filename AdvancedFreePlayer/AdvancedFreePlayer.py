@@ -649,9 +649,9 @@ class AdvancedFreePlayer(Screen):
                 o.close()
         except Exception as e:
             self.subtitle = []
-            print "Error loadsrt"
-            print str(e)
-            printDEBUG("Error loadtxt_type, I/O error({0}): {1}".format(e.errno, e.strerror) )
+            #print "Error loadsrt"
+            #print str(e)
+            printDEBUG("Error loadsrt %s" % str(e) )
             try:
                 o.close()
             except:
