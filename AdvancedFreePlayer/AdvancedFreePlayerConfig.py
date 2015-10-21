@@ -56,7 +56,7 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         self.list.append(getConfigListEntry(_("Initial movies folder:"), config.plugins.AdvancedFreePlayer.FileListLastFolder))
         self.list.append(getConfigListEntry(_("Remember last used folder:"), config.plugins.AdvancedFreePlayer.StoreLastFolder))
         self.list.append(getConfigListEntry(_("Key OK behavior:"), config.plugins.AdvancedFreePlayer.KeyOK))
-        self.list.append(getConfigListEntry(_("Ask for file removal when % played:"), config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed))
+        self.list.append(getConfigListEntry(_("Ask for file removal when % played (0=off):"), config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed))
         self.list.append(getConfigListEntry(_("Always ask for file removal:"), config.plugins.AdvancedFreePlayer.DeleteFileQuestion))
         
         self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))

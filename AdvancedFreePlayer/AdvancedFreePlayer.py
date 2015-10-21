@@ -59,7 +59,8 @@ play/red - pause on/off\n\
 green - change background color\n\
 yellow - change type font\n\
 blue - change color font\n\
-text - show/hide subtitle\n\
+TV - show/hide subtitle\n\
+text - Download subtitles\n\
 menu/info - show about\n\
 ok - infobar\n\
 audio - change audio track\n\
@@ -193,6 +194,7 @@ class AdvancedFreePlayer(Screen):
                 "ToggleFontColor": self.ToggleFontColor,
                 "ToggleSubtitles": self.ToggleSubtitles,
                 "SelectAudio": self.SelectAudio,
+                "SelectSubtitles": self.SelectSubtitles,
             },-2)
         self.onShown.append(self.__LayoutFinish)
         self.onClose.append(self.__onClose)
@@ -768,7 +770,7 @@ class AdvancedFreePlayer(Screen):
     def audioSelected(self, ret=None):
         print "[AdvancedFreePlayer infobar::audioSelected]", ret
 
-#Moje funkcje START
+#M##########################################################################################oje funkcje START
     def updateTextBackground(self, element, text):
         showBackgroud = self.fontBackgroundState
         if not text:
@@ -818,7 +820,7 @@ class AdvancedFreePlayer(Screen):
             pass
         self.session.nav.stopService()
         print "Played %d" % self.PercentagePlayed
-        if myConfig.DeleteFileQuestion.value == True or self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value):
+        if myConfig.DeleteFileQuestion.value == True or (self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
             def ExitRet(ret):
                 if ret:
                     myDir = path.dirname(self.openmovie)
@@ -829,6 +831,17 @@ class AdvancedFreePlayer(Screen):
             self.session.openWithCallback(ExitRet, MessageBox, _("Delete this movie?"), timeout=10, default=False)
 
         self.close()
+
+##################################################################### RELOADING SUBTITLES >>>>>>>>>>
+    def SelectSubtitles(self):
+        self.pause()
+        try:
+            from Plugins.Extensions.DMnapi.DMnapi import DMnapi
+            self.session.openWithCallback(self.dmnapiCallback, DMnapi, self.openmovie)
+        except:
+            printDEBUG("Exception loading DMnapi!!!")
+        self.loadsubtitle()
+        self.play()
 
 ##################################################################### CHANGE FONT SIZE >>>>>>>>>>
     def setFontSize(self, fontSize):
@@ -962,7 +975,7 @@ class AdvancedFreePlayerStart(Screen):
         self["key_yellow"] = StaticText(_("Config"))
         self["key_blue"] = StaticText(_("Sort by name"))
         self["info"].setText(PluginName + ' ' + PluginInfo)
-        self.filelist = FileList(myConfig.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi|txt|srt|mpg|vob|divx|m4v|mkv|mp4|dat|mov|ts)(?!\.(cuts|ap$|meta$|sc$))",sortDate=False)
+        self.filelist = FileList(myConfig.FileListLastFolder.value, matchingPattern = "(?i)^.*\.(avi|txt|srt|mpg|vob|divx|m4v|mkv|mp4|dat|mov|ts|url)(?!\.(cuts|ap$|meta$|sc$))",sortDate=False)
         self["filelist"] = self.filelist
         self["actions"] = ActionMap(["AdvancedFreePlayerSelector"],
             {
@@ -1034,9 +1047,9 @@ class AdvancedFreePlayerStart(Screen):
             if lastDMNAPIsetting is not None:
                 config.plugins.dmnapi.autosrton.value = lastDMNAPIsetting
                 
-        if not path.exists(self.opensubtitle):
+        if not path.exists(self.opensubtitle) and not self.opensubtitle.startswith("http://"):
             self.opensubtitle = ""
-        if path.exists(self.openmovie):
+        if path.exists(self.openmovie) or self.openmovie.startswith("http://"):
             if myConfig.SRTplayer.value =="system":
                 try: 
                     lastOPLIsetting = config.subtitles.pango_autoturnon.value
@@ -1064,6 +1077,8 @@ class AdvancedFreePlayerStart(Screen):
                     except: pass
                 self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
                 return
+        else:
+            printDEBUG("StartPlayer>>> File %s does not exist :(" % self.openmovie)
 
     def runDMnapi(self):
         if self.DmnapiInstalled == True:
@@ -1113,15 +1128,32 @@ class AdvancedFreePlayerStart(Screen):
             d = self.filelist.getCurrentDirectory()
             if d is None:
                 d=""
+            elif not d.endswith('/'):
+                d +='/'
             #self.title = d
             self["myPath"].setText(d)
         else:
             d = self.filelist.getCurrentDirectory()
             f = self.filelist.getFilename()
-            printDEBUG("self.OK>> " + d + f)
+            printDEBUG("self.selectFile>> " + d + f)
             temp = self.getExtension(f)
             #print temp
-            if temp == ".srt" or temp == ".txt":
+            if temp == ".url":
+                self.opensubtitle = ''
+                self.openmovie = ''
+                with open(d + f,'r') as UrlContent:
+                    for data in UrlContent:
+                        print data
+                        if data.find('movieURL=') > -1: #find instead of startswith to avoid BOM issues ;)
+                            print data
+                            self.openmovie = data.split('=')[1].strip()
+                        elif data.find('srtURL=') > -1:
+                            self.opensubtitle = data.split('=')[1].strip()
+                self["filemovie"].setText(self.movietxt + self.openmovie)
+                self["filesubtitle"].setText(self.subtitletxt + self.opensubtitle)
+                global PercentagePlayed
+                PercentagePlayed = 0
+            elif temp == ".srt" or temp == ".txt":
                 #if self.DmnapiInstalled == True:
                 if self.opensubtitle == (d + f): #clear subtitles selection
                     self["filesubtitle"].setText(self.subtitletxt)
