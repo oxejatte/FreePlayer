@@ -219,10 +219,8 @@ class FileList(MenuList):
             self.moveToIndex(0)
             for x in self.list:
                 p = x[0][0]
-                
                 if isinstance(p, eServiceReference):
                     p = p.getPath()
-                
                 if p == select:
                     self.moveToIndex(i)
                 i += 1

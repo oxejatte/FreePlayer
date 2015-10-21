@@ -951,6 +951,7 @@ class AdvancedFreePlayerStart(Screen):
         self.subtitletxt = _('Subtitle: ')
         self.rootID = myConfig.MultiFramework.value
         self.LastPlayedService = None
+        self.LastFolderSelected= None
   
         self.skin  = LoadSkin("AdvancedFreePlayerStart")
         
@@ -1124,7 +1125,13 @@ class AdvancedFreePlayerStart(Screen):
     def selectFile(self):
         selection = self["filelist"].getSelection()
         if selection[1] == True: # isDir
-            self["filelist"].changeDir(selection[0])
+            if len(selection[0]) > len(self.filelist.getCurrentDirectory()) or self.LastFolderSelected == None:
+                self.LastFolderSelected = selection[0]
+                self["filelist"].changeDir(selection[0], "FakeFolderName")
+            else:
+                print "Folder Down"
+                self["filelist"].changeDir(selection[0], self.LastFolderSelected)
+            
             d = self.filelist.getCurrentDirectory()
             if d is None:
                 d=""
