@@ -49,7 +49,25 @@ myConfig.StoreLastFolder = ConfigYesNo(default = True)
 myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
 #position,size,type,color,visibility,background
 
-KeyMapInfo=_("Player KEYMAP:\n\n\
+if path.exists('/usr/local/e2/'):
+  KeyMapInfo=_("Player KEYMAP:\n\n\
+up/down - position subtitle\n\
+left/right - size subtitle\n\
+channel up/down - seek+/- subtitle\n\
+???3/6/9 - seek+ 30sek/2min/5min movie\n\
+???1/4/7 - seek- 30sek/2min/5min movie\n\
+F1 - pause on/off\n\
+F2 - change background color\n\
+F3 - change type font\n\
+F4 - change color font\n\
+T - show/hide subtitle\n\
+D - Download subtitles\n\
+F5/SPACE - show about\n\
+OK - infobar\n\
+audio - change audio track\n\
+")
+else:
+  KeyMapInfo=_("Player KEYMAP:\n\n\
 up/down - position subtitle\n\
 left/right - size subtitle\n\
 channel up/down - seek+/- subtitle\n\
@@ -272,9 +290,8 @@ class AdvancedFreePlayer(Screen):
         self.timer = eTimer()
         self.timer.callback.append(self.timerEvent)
         self.timer.start(200, False)
-        #printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
         root = eServiceReference(self.rootID, 0, self.openmovie)
-        printDEBUG("Playing: " + str(root))
         self.session.nav.playService(root)
         self.stateplay = "Play"
         self["afpSubtitles"].instance.move(ePoint(0,self.fontpos))
@@ -835,10 +852,16 @@ class AdvancedFreePlayer(Screen):
 
 ##################################################################### RELOADING SUBTITLES >>>>>>>>>>
     def SelectSubtitles(self):
+        def dmnapiCallback(self, answer=None):
+            printDEBUG("SelectSubtitles:dmnapiCallback")
+
+            if answer:
+                print answer[0:200]
+                
         self.pause()
         try:
             from Plugins.Extensions.DMnapi.DMnapi import DMnapi
-            self.session.openWithCallback(self.dmnapiCallback, DMnapi, self.openmovie)
+            self.session.openWithCallback(dmnapiCallback, DMnapi, self.openmovie)
         except:
             printDEBUG("Exception loading DMnapi!!!")
         self.loadsubtitle()
