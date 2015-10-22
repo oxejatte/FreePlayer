@@ -290,7 +290,7 @@ class AdvancedFreePlayer(Screen):
         self.timer = eTimer()
         self.timer.callback.append(self.timerEvent)
         self.timer.start(200, False)
-        printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        printDEBUG("Playing: " + str(self.rootID) + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
         root = eServiceReference(self.rootID, 0, self.openmovie)
         self.session.nav.playService(root)
         self.stateplay = "Play"
@@ -861,7 +861,7 @@ class AdvancedFreePlayer(Screen):
         self.pause()
         try:
             from Plugins.Extensions.DMnapi.DMnapi import DMnapi
-            self.session.openWithCallback(dmnapiCallback, DMnapi, self.openmovie)
+            self.session.openWithCallback(dmnapiCallback, DMnapi, self.openmovie, save = False)
         except:
             printDEBUG("Exception loading DMnapi!!!")
         self.loadsubtitle()
