@@ -851,21 +851,21 @@ class AdvancedFreePlayer(Screen):
         self.close()
 
 ##################################################################### RELOADING SUBTITLES >>>>>>>>>>
+    def dmnapiCallback(self, answer=None):
+        printDEBUG("SelectSubtitles:dmnapiCallback")
+        if answer:
+            print answer[0:200]
+        #self.loadsubtitle()
+        self.play()
+        
     def SelectSubtitles(self):
-        def dmnapiCallback(self, answer=None):
-            printDEBUG("SelectSubtitles:dmnapiCallback")
-
-            if answer:
-                print answer[0:200]
                 
         self.pause()
         try:
             from Plugins.Extensions.DMnapi.DMnapi import DMnapi
-            self.session.openWithCallback(dmnapiCallback, DMnapi, self.openmovie, save = False)
+            self.session.openWithCallback(self.dmnapiCallback, DMnapi, self.openmovie, save = False)
         except:
             printDEBUG("Exception loading DMnapi!!!")
-        self.loadsubtitle()
-        self.play()
 
 ##################################################################### CHANGE FONT SIZE >>>>>>>>>>
     def setFontSize(self, fontSize):
