@@ -129,7 +129,7 @@ class AdvancedFreePlayer(Screen):
         self.oldinfo = ""
         self.openmovie = openmovie
         self.opensubtitle = opensubtitle
-        self.rootID = rootID
+        self.rootID = int(rootID)
         self.LastPlayedService = LastPlayedService
         self.subtitle = []
         self.fontpos = 540
@@ -272,8 +272,9 @@ class AdvancedFreePlayer(Screen):
         self.timer = eTimer()
         self.timer.callback.append(self.timerEvent)
         self.timer.start(200, False)
-        printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
-        root = eServiceReference(self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        #printDEBUG("Playing: " + self.rootID + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
+        root = eServiceReference(self.rootID, 0, self.openmovie)
+        printDEBUG("Playing: " + str(root))
         self.session.nav.playService(root)
         self.stateplay = "Play"
         self["afpSubtitles"].instance.move(ePoint(0,self.fontpos))
@@ -1152,14 +1153,22 @@ class AdvancedFreePlayerStart(Screen):
                     for data in UrlContent:
                         print data
                         if data.find('movieURL=') > -1: #find instead of startswith to avoid BOM issues ;)
-                            print data
                             self.openmovie = data.split('=')[1].strip()
                         elif data.find('srtURL=') > -1:
                             self.opensubtitle = data.split('=')[1].strip()
-                self["filemovie"].setText(self.movietxt + self.openmovie)
-                self["filesubtitle"].setText(self.subtitletxt + self.opensubtitle)
-                global PercentagePlayed
-                PercentagePlayed = 0
+                if self["filemovie"].getText() != (self.movietxt + self.openmovie):
+                    self["filemovie"].setText(self.movietxt + self.openmovie)
+                    self["filesubtitle"].setText(self.subtitletxt + self.opensubtitle)
+                    global PercentagePlayed
+                    PercentagePlayed = 0
+                elif myConfig.KeyOK.value == 'play':
+                    self.PlayMovie()
+                    return
+                else:
+                    self.openmovie = ''
+                    self["filemovie"].setText(self.movietxt)
+                    self.opensubtitle = ''
+                    self["filesubtitle"].setText(self.subtitletxt + self.opensubtitle)
             elif temp == ".srt" or temp == ".txt":
                 #if self.DmnapiInstalled == True:
                 if self.opensubtitle == (d + f): #clear subtitles selection
