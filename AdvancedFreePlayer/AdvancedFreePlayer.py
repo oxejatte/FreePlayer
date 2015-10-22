@@ -860,7 +860,7 @@ class AdvancedFreePlayer(Screen):
         
     def SelectSubtitles(self):
                 
-        self.pause()
+        self.pause(False)
         try:
             from Plugins.Extensions.DMnapi.DMnapi import DMnapi
             self.session.openWithCallback(self.dmnapiCallback, DMnapi, self.openmovie, save = False)
@@ -924,7 +924,7 @@ class AdvancedFreePlayer(Screen):
         elif self.stateplay == "Pause":
             self.play()
 
-    def pause(self):
+    def pause(self, ShowInfobar = True ):
         if not self.stateplay == "Play":
             return
         cs = self.session.nav.getCurrentService()
@@ -935,7 +935,7 @@ class AdvancedFreePlayer(Screen):
             return
         pauseable.pause()
         self.stateplay = "Pause"
-        if myConfig.InfobarOnPause.value == True:
+        if myConfig.InfobarOnPause.value == True and ShowInfobar == True:
             self.session.openWithCallback(self.play,AdvancedFreePlayerInfobar,isPause = True)
             return
 
