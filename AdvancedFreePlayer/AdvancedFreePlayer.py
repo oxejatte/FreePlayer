@@ -11,13 +11,13 @@ from Components.Label import Label
 from Components.ActionMap import ActionMap
 from Components.Pixmap import Pixmap
 from Components.Sources.StaticText import StaticText
-from Components.ProgressBar import ProgressBar
+#from Components.ProgressBar import ProgressBar
 from Components.config import *
-from Components.ServiceEventTracker import ServiceEventTracker
-from Components.GUIComponent import GUIComponent
-from Components.Converter.ConditionalShowHide import ConditionalShowHide
+#from Components.ServiceEventTracker import ServiceEventTracker
+#from Components.GUIComponent import GUIComponent
+#from Components.Converter.ConditionalShowHide import ConditionalShowHide
 from Tools.LoadPixmap import LoadPixmap
-from os import path, remove, listdir, symlink
+from os import path, remove, listdir, symlink, system, access, W_OK
 
 from enigma import eTimer,ePoint,eSize,gFont,eConsoleAppContainer,iServiceInformation,eServiceReference, addFont, getDesktop, iPlayableService, fontRenderClass
 
@@ -26,12 +26,12 @@ from skin import parseColor,parseFont
 from time import *
 from FileList2 import FileList
 
-import subprocess,fcntl
+#import subprocess,fcntl
 
 config.plugins.AdvancedFreePlayer = ConfigSubsection()
 myConfig = config.plugins.AdvancedFreePlayer
 myConfig.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
-myConfig.MultiFramework = ConfigSelection(default = "4097", choices = [("4097", "gstreamer (root 4097)"),("4099", "ffmpeg (root 4099)"), ("select", _("Select during start"))])
+myConfig.MultiFramework = ConfigSelection(default = "4097", choices = [("4097", "gstreamer (root 4097)"),("4099", "ffmpeg (root 4099)"),("1", "hardware (root 1)"), ("select", _("Select during start"))])
 myConfig.StopService = ConfigYesNo(default = True)
 myConfig.InfobarTime = ConfigSelectionNumber(2, 9, 1, default = 5)
 myConfig.InfobarOnPause = ConfigYesNo(default = True)
@@ -133,8 +133,9 @@ class AdvancedFreePlayer(Screen):
     SHOWNSUBTITLE = 6
     HIDDENSUBTITLE = 7
 
-    def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService):
+    def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService, URLlinkName = ''):
         self.conditionalNotVisible = []
+        self.URLlinkName = URLlinkName
         self.PercentagePlayed = 0
         self.frameon = 1 / 24
         self.seeksubtitle = 0
@@ -838,13 +839,51 @@ class AdvancedFreePlayer(Screen):
             pass
         self.session.nav.stopService()
         print "Played %d" % self.PercentagePlayed
-        if myConfig.DeleteFileQuestion.value == True or (self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
+        if self.URLlinkName == '' and not access(self.openmovie, W_OK):
+            printDEBUG("No access to delete %s" % self.openmovie)
+        elif self.URLlinkName != '' and not access(self.URLlinkName, W_OK):
+            printDEBUG("No access to delete %s" % self.URLlinkName)
+        elif myConfig.DeleteFileQuestion.value == True or (self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
+            def DeleteFile(f2d):
+                try:
+                    remove(f2d)
+                    printDEBUG("Deleting %s" % f2d)
+                except:
+                    printDEBUG("Error deleting %s" % f2d)
+                
             def ExitRet(ret):
                 if ret:
-                    myDir = path.dirname(self.openmovie)
-                    filelist = [ f for f in listdir(myDir) if f.startswith(getNameWithoutExtension(path.basename(self.openmovie))) ]
-                    for f in filelist:
-                        printDEBUG("Deleting %s" % f)
+                    if self.URLlinkName == '':
+                        myDir = path.dirname(self.openmovie)
+                        myFile = getNameWithoutExtension(path.basename(self.openmovie)) #To delete all files e.g. txt,jpg,eit,etc
+                        if path.exists(self.openmovie):
+                            DeleteFile(self.openmovie)
+                        if path.exists(self.opensubtitle):
+                            DeleteFile(self.opensubtitle)
+                        if path.exists(myDir + '/' + myFile + ".jpg"):
+                            DeleteFile(myDir + '/' + myFile + ".jpg")
+                        if path.exists(myDir + '/' + myFile + ".eit"):
+                            DeleteFile(myDir + '/' + myFile + ".eit")
+                        if path.exists(myDir + '/' + myFile + ".txt"):
+                            DeleteFile(myDir + '/' + myFile + ".txt")
+                        if self.openmovie.endswith('.ts'):
+                            if path.exists(self.openmovie + ".ap"):
+                                DeleteFile(self.openmovie + ".ap")
+                            if path.exists(self.openmovie + ".meta"):
+                                DeleteFile(self.openmovie + ".meta")
+                            if path.exists(self.openmovie + ".sc"):
+                                DeleteFile(self.openmovie + ".sc")
+                        try:
+                            printDEBUG("Executing 'rm -f \"%s/%s.*\"'" %(myDir,myFile))
+                            ClearMemory() #some tuners (e.g. nbox) with small amount of RAM have problems with next command
+                            system('rm -f "%s/%s*"' %(myDir,myFile))
+                        except:
+                            printDEBUG("Error executing system>delete files engine")
+                            
+                    else:
+                        printDEBUG("Deleting %s" % self.URLlinkName)
+                        if path.exists(self.URLlinkName):
+                            DeleteFile(self.URLlinkName)
 
             self.session.openWithCallback(ExitRet, MessageBox, _("Delete this movie?"), timeout=10, default=False)
 
@@ -969,8 +1008,9 @@ class AdvancedFreePlayerStart(Screen):
     def __init__(self, session):
         #printDEBUG("AdvancedFreePlayerStart >>>")
         self.sortDate = False
-        self.openmovie = ""
-        self.opensubtitle = "aqq"
+        self.openmovie = ''
+        self.opensubtitle = ''
+        self.URLlinkName = ''
         self.movietxt = _('Movie: ')
         self.subtitletxt = _('Subtitle: ')
         self.rootID = myConfig.MultiFramework.value
@@ -1054,7 +1094,10 @@ class AdvancedFreePlayerStart(Screen):
             from Screens.ChoiceBox import ChoiceBox
             self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),])
         else:
-            self.rootID = myConfig.MultiFramework.value
+            if self.openmovie.endswith('.ts'):
+                self.rootID = '1'
+            else:
+                self.rootID = myConfig.MultiFramework.value
             self.StartPlayer()
 
     def SelectedFramework(self, ret):
@@ -1066,12 +1109,14 @@ class AdvancedFreePlayerStart(Screen):
     def StartPlayer(self):
         lastOPLIsetting = None
         lastDMNAPIsetting = None
+        
         def EndPlayer():
             if lastOPLIsetting is not None:
                 config.subtitles.pango_autoturnon.valu = lastOPLIsetting
             if lastDMNAPIsetting is not None:
                 config.plugins.dmnapi.autosrton.value = lastDMNAPIsetting
-                
+            self["filelist"].refresh()
+
         if not path.exists(self.opensubtitle) and not self.opensubtitle.startswith("http://"):
             self.opensubtitle = ""
         if path.exists(self.openmovie) or self.openmovie.startswith("http://"):
@@ -1086,7 +1131,7 @@ class AdvancedFreePlayerStart(Screen):
                         config.plugins.dmnapi.autosrton.value = True
                         printDEBUG("DMNapi subtitles enabled")
                     except: pass
-                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService)
+                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService,self.URLlinkName)
                 return
             else:
                 try: 
@@ -1100,7 +1145,7 @@ class AdvancedFreePlayerStart(Screen):
                         config.plugins.dmnapi.autosrton.value = False
                         printDEBUG("DMNapi subtitles disabled")
                     except: pass
-                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService)
+                self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService,self.URLlinkName)
                 return
         else:
             printDEBUG("StartPlayer>>> File %s does not exist :(" % self.openmovie)
@@ -1177,6 +1222,7 @@ class AdvancedFreePlayerStart(Screen):
                         print data
                         if data.find('movieURL=') > -1: #find instead of startswith to avoid BOM issues ;)
                             self.openmovie = data.split('=')[1].strip()
+                            self.URLlinkName = d + f
                         elif data.find('srtURL=') > -1:
                             self.opensubtitle = data.split('=')[1].strip()
                 if self["filemovie"].getText() != (self.movietxt + self.openmovie):
@@ -1213,6 +1259,7 @@ class AdvancedFreePlayerStart(Screen):
                     PercentagePlayed = 0
                     self.openmovie = d + f
                     self["filemovie"].setText(self.movietxt + f)
+                    self.URLlinkName = ''
                 
                 self.SetDescriptionAndCover(self.openmovie)
                 

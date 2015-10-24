@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-PluginInfo='@j00zek 22/10/2015'
+PluginInfo='@j00zek 24/10/2015'
 
 #permanent
 PluginName = 'AdvancedFreePlayer'
@@ -45,3 +45,6 @@ def printDEBUG( myText , myFUNC = ''):
             pass
 
 printDBG=printDEBUG
+
+def ClearMemory(): #avoid GS running os.* (e.g. os.system) on tuners with small RAM
+    with open("/proc/sys/vm/drop_caches", "w") as f: f.write("1\n")
