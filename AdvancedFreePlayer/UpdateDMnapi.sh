@@ -67,8 +67,8 @@ echo "_(Installing new version...)"
 if [ ! -e /DuckboxDisk ]; then
   [ -e /usr/lib/enigma2/python/Plugins/Extensions/DMnapi ] || mkdir /usr/lib/enigma2/python/Plugins/Extensions/DMnapi
   rm -rf /usr/lib/enigma2/python/Plugins/Extensions/DMnapi/areqq-DMnapi-* 2>/dev/null
-  touch /tmp/$version/DMnapi/$version 2>/dev/null
-  cp -a /tmp/$version/DMnapi/* /usr/lib/enigma2/python/Plugins/Extensions/DMnapi/
+  touch /tmp/$version/$version 2>/dev/null
+  cp -a /tmp/$version/* /usr/lib/enigma2/python/Plugins/Extensions/DMnapi/
 else
   echo
   echo "_(github is always up-2-date)"
