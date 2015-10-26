@@ -96,12 +96,12 @@ else
   echo "_(github is always up-2-date)"
 fi
 
-if [ $? -gt 0 ]; then
-  echo
-  echo "_(Installation incorrect!!!)"
-else
-  echo
-  echo "_(Success: Restart system to use new plugin version)"
-fi
+#if [ $? -gt 0 ]; then
+#  echo
+#  echo "_(Installation incorrect!!!)"
+#else
+#  echo
+#  echo "_(Success: Restart system to use new plugin version)"
+#fi
 
 exit 0

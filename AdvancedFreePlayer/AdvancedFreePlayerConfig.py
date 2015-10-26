@@ -10,7 +10,7 @@ from Components.ConfigList import ConfigList, ConfigListScreen
 from Components.Console import Console
 from Components.Label import Label
 from enigma import eEnv, eTimer
-from os import symlink as os_symlink, remove as os_remove, fsync as os_fsync, rename as os_rename, walk as os_walk, listdir, mkdir as os_mkdir, chmod as os_chmod
+from os import path, remove as os_remove, fsync as os_fsync, rename as os_rename, walk as os_walk, listdir, mkdir as os_mkdir, chmod as os_chmod
 from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
 from Tools.Directories import fileExists, resolveFilename, pathExists, SCOPE_PLUGINS, SCOPE_SKIN_IMAGE
@@ -85,9 +85,10 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         def goUpdate(ret):
             if ret is True:
                 runlist = []
-                runlist.append( ('chmod 755 %sPluginUpdate.sh' % PluginPath) )
-                runlist.append( ('cp -a %sPluginUpdate.sh /tmp/PluginUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
-                runlist.append( ('/tmp/PluginUpdate.sh %s "%s"' % (config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
+                runlist.append( ('chmod 755 %sUpdate*.sh' % PluginPath) )
+                runlist.append( ('cp -a %sUpdatePlugin.sh /tmp/AFPUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
+                runlist.append( ('/tmp/AFPUpdate.sh %s "%s"' % (config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
+                runlist.append( ('%sUpdateDMnapi.sh %s "%s"' % (PluginPath,config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
                 self.session.openWithCallback(doNothing, AdvancedFreePlayerConsole, title = _("Updating plugin"), cmdlist = runlist)
                 return
         self.session.openWithCallback(goUpdate, MessageBox,_("Do you want to update plugin?"),  type = MessageBox.TYPE_YESNO, timeout = 10, default = False)
@@ -183,9 +184,9 @@ class AdvancedFreePlayerConsole(Screen):
                 self.runFinished(-1) # so we must call runFinished manual
         else:
             #lastpage = self["text"].isAtLastPage()
-            str = self["text"].getText()
-            str += _("\nUse up/down arrows to scroll text. OK closes window");
-            self["text"].setText(str)
+            #str = self["text"].getText()
+            #str += _("\nUse up/down arrows to scroll text. OK closes window");
+            #self["text"].setText(str)
             #if lastpage:
             self["text"].lastPage()
             if self.finishedCallback is not None:

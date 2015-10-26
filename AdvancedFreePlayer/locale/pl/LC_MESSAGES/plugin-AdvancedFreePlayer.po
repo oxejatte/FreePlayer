@@ -90,8 +90,8 @@ msgstr "Wersja MultiFramework (tylko sh4):"
 msgid "Error load subtitle !!!"
 msgstr "Błąd ładowania pliku z napisami !!!"
 
-msgid "No DMnapi"
-msgstr "Brak DMnapi"
+msgid "Install DMnapi"
+msgstr "Instalacja DMnapi"
 
 msgid "Sort by name"
 msgstr "Sortuj wg nazw"
@@ -236,7 +236,7 @@ msgid "Download:"
 msgstr "Pobierz:"
 
 msgid "every new version (debug)"
-msgstr "kazdą nową wersję (debug)"
+msgstr "każdą nową wersję (debug)"
 
 msgid "only checked versions"
 msgstr "tylko wersję sprawdzoną (public)"
@@ -248,4 +248,13 @@ msgid "Error checking web version"
 msgstr "Błąd pobierania informacji o nowej wersji"
 
 msgid "Vew version available on the web"
-msgstr "Nowa wersja dostepna"
+msgstr "Nowa wersja dostępna"
+
+msgid "DMnapi controlled by OPKG. Please use it for updates."
+msgstr "DMnapi kontrolowany przez OPKG. Aktualizacje tylko przez OPKG."
+
+msgid "Downloading latest DMnapi version..."
+msgstr "Pobieram ostatnią wersję wtyczki DMnapi..."
+
+msgid "Success: Restart system to reload plugins"
+msgstr "Sukces: zrestartuj GUI aby przeładować wtyczki"

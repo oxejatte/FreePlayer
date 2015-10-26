@@ -41,12 +41,14 @@ myConfig.KeyOK = ConfigSelection(default = "unselect", choices = [("unselect", _
 myConfig.SRTplayer = ConfigSelection(default = "system", choices = [("system", _("System")),("plugin", _("Plugin"))])
 myConfig.TXTplayer = ConfigSelection(default = "plugin", choices = [("convert", _("System after conversion to srt")),("plugin", _("Plugin"))])
 myConfig.Version = ConfigSelection(default = "public", choices = [("debug", _("every new version (debug)")),("public", _("only checked versions"))])
+
 #
 # hidden atributes to store configuration data
 #
 myConfig.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
 myConfig.StoreLastFolder = ConfigYesNo(default = True)
 myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
+myConfig.PlayerOn = NoSave( ConfigYesNo(default = False))
 #position,size,type,color,visibility,background
 
 if path.exists('/usr/local/e2/'):
@@ -294,6 +296,7 @@ class AdvancedFreePlayer(Screen):
         printDEBUG("Playing: " + str(self.rootID) + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
         root = eServiceReference(self.rootID, 0, self.openmovie)
         self.session.nav.playService(root)
+        myConfig.PlayerOn.value = True
         self.stateplay = "Play"
         self["afpSubtitles"].instance.move(ePoint(0,self.fontpos))
         self["afpSubtitles"].instance.setForegroundColor(parseColor(self.fontcolor_list[self.fontcolor_nr]))
@@ -789,7 +792,7 @@ class AdvancedFreePlayer(Screen):
     def audioSelected(self, ret=None):
         print "[AdvancedFreePlayer infobar::audioSelected]", ret
 
-#M##########################################################################################oje funkcje START
+########################################################################################### funkcje START
     def updateTextBackground(self, element, text):
         showBackgroud = self.fontBackgroundState
         if not text:
@@ -832,6 +835,13 @@ class AdvancedFreePlayer(Screen):
         return True
 
     def ExitPlayer(self):
+        def DeleteFile(f2d):
+            try:
+                remove(f2d)
+                printDEBUG("Deleting %s" % f2d)
+            except:
+                printDEBUG("Error deleting %s" % f2d)
+                
         self.stateplay = "Stop"
         try:
             self.timer.stop()
@@ -843,14 +853,10 @@ class AdvancedFreePlayer(Screen):
             printDEBUG("No access to delete %s" % self.openmovie)
         elif self.URLlinkName != '' and not access(self.URLlinkName, W_OK):
             printDEBUG("No access to delete %s" % self.URLlinkName)
+        if path.exists('/tmp/afpsubs.srt'):    
+            DeleteFile('/tmp/afpsubs.srt')
+            
         elif myConfig.DeleteFileQuestion.value == True or (self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
-            def DeleteFile(f2d):
-                try:
-                    remove(f2d)
-                    printDEBUG("Deleting %s" % f2d)
-                except:
-                    printDEBUG("Error deleting %s" % f2d)
-                
             def ExitRet(ret):
                 if ret:
                     if self.URLlinkName == '':
@@ -890,19 +896,24 @@ class AdvancedFreePlayer(Screen):
         self.close()
 
 ##################################################################### RELOADING SUBTITLES >>>>>>>>>>
-    def dmnapiCallback(self, answer=None):
+    def dmnapisubsCallback(self, answer=None):
         printDEBUG("SelectSubtitles:dmnapiCallback")
         if answer:
-            print answer[0:200]
-        #self.loadsubtitle()
+            with open('/tmp/afpsubs.srt','w') as mysrt:
+                mysrt.write(answer)
+                mysrt.close
+            self.opensubtitle = '/tmp/afpsubs.srt'
+            self.loadsrt()
+            self.enablesubtitle = True
+            
         self.play()
         
     def SelectSubtitles(self):
                 
         self.pause(False)
         try:
-            from Plugins.Extensions.DMnapi.DMnapi import DMnapi
-            self.session.openWithCallback(self.dmnapiCallback, DMnapi, self.openmovie, save = False)
+            from Plugins.Extensions.DMnapi.DMnapisubs import DMnapisubs
+            self.session.openWithCallback(self.dmnapisubsCallback, DMnapisubs, self.openmovie, save = False)
         except:
             printDEBUG("Exception loading DMnapi!!!")
 
@@ -1029,13 +1040,12 @@ class AdvancedFreePlayerStart(Screen):
         self["Description"] = Label(KeyMapInfo)
         self["Cover"] = Pixmap()
         
-        print ExtPluginsPath +'/DMnapi/DMnapi.pyo'
         if path.exists(ExtPluginsPath + '/DMnapi/DMnapi.pyo') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.pyc') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.py'):
             self.DmnapiInstalled = True
             self["key_green"] = StaticText(_("DMnapi"))
         else:
             self.DmnapiInstalled = False
-            self["key_green"] = StaticText(_("No DMnapi"))
+            self["key_green"] = StaticText(_("Install DMnapi"))
             
         self["key_yellow"] = StaticText(_("Config"))
         self["key_blue"] = StaticText(_("Sort by name"))
@@ -1150,11 +1160,6 @@ class AdvancedFreePlayerStart(Screen):
         else:
             printDEBUG("StartPlayer>>> File %s does not exist :(" % self.openmovie)
 
-    def runDMnapi(self):
-        if self.DmnapiInstalled == True:
-            self.DMnapi()
-            self["filelist"].refresh()
-
     def runConfig(self):
         from AdvancedFreePlayerConfig import AdvancedFreePlayerConfig
         self.session.open(AdvancedFreePlayerConfig)
@@ -1171,24 +1176,6 @@ class AdvancedFreePlayerStart(Screen):
             self["filelist"].sortDateEnable()
             self.sortDate=True
             self["key_blue"].setText(_("Sort by date"))
-        self["filelist"].refresh()
-
-    def DMnapi(self):
-        if not self["filelist"].canDescent():
-            f = self.filelist.getFilename()
-            temp = f[-4:]
-            if temp != ".srt" and temp != ".txt":
-                curSelFile = self["filelist"].getCurrentDirectory() + self["filelist"].getFilename()
-                try:
-                    from Plugins.Extensions.DMnapi.DMnapi import DMnapi
-                    self.session.openWithCallback(self.dmnapiCallback, DMnapi, curSelFile)
-                except:
-                    printDEBUG("Exception loading DMnapi!!!")
-            else:
-                self.session.open(MessageBox,_("Please select movie files !\n\n"),MessageBox.TYPE_INFO)
-                return
-
-    def dmnapiCallback(self, answer=False):
         self["filelist"].refresh()
 
     def selectFile(self):
@@ -1371,10 +1358,52 @@ class AdvancedFreePlayerStart(Screen):
         return text
 
     def ExitPlayer(self):
+        myConfig.PlayerOn.value = False
         configfile.save()
         self.close()
 
+##################################################################### SUBTITLES >>>>>>>>>>
+    def runDMnapi(self):
+        if self.DmnapiInstalled == True:
+            self.DMnapi()
+            self["filelist"].refresh()
+        else:
+            def doNothing():
+                pass
+            def goUpdate(ret):
+                if ret is True:
+                    runlist = []
+                    runlist.append( ('chmod 755 %sUpdate*.sh' % PluginPath) )
+                    runlist.append( ('cp -a %sUpdateDMnapi.sh /tmp/AFPUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
+                    runlist.append( ('/tmp/AFPUpdate.sh %s "%s"' % (config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
+                    from AdvancedFreePlayerConfig import AdvancedFreePlayerConsole
+                    self.session.openWithCallback(doNothing, AdvancedFreePlayerConsole, title = _("Installing DMnapi plugin"), cmdlist = runlist)
+                    return
+            self.session.openWithCallback(goUpdate, MessageBox,_("Do you want to install DMnapi plugin?"),  type = MessageBox.TYPE_YESNO, timeout = 10, default = False)
+        return
 
+    def DMnapi(self):
+        if not self["filelist"].canDescent():
+            f = self.filelist.getFilename()
+            temp = f[-4:]
+            if temp != ".srt" and temp != ".txt":
+                curSelFile = self["filelist"].getCurrentDirectory() + self["filelist"].getFilename()
+                try:
+                    from Plugins.Extensions.DMnapi.DMnapi import DMnapi
+                    self.session.openWithCallback(self.dmnapiCallback, DMnapi, curSelFile)
+                except:
+                    printDEBUG("Exception loading DMnapi!!!")
+            else:
+                self.session.open(MessageBox,_("Please select movie files !\n\n"),MessageBox.TYPE_INFO)
+                return
+
+    def dmnapiCallback(self, answer=False):
+        self["filelist"].refresh()
+        
+##################################################################### CLASS ENDS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                
 def getNameWithoutExtension(MovieNameWithExtension):
     extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
     return MovieNameWithExtension[: -extLenght]
+
+    
