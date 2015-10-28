@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-PluginInfo='@j00zek 26/10/2015'
+PluginInfo='@j00zek 28/10/2015'
 
 #permanent
 PluginName = 'AdvancedFreePlayer'
