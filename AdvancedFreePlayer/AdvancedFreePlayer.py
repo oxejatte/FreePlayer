@@ -45,7 +45,7 @@ myConfig.Version = ConfigSelection(default = "public", choices = [("debug", _("e
 #
 # hidden atributes to store configuration data
 #
-myConfig.FileListLastFolder = ConfigText(default = "/hdd/movie", fixed_size = False)
+myConfig.FileListLastFolder = ConfigText(default = "/hdd/movie/", fixed_size = False)
 myConfig.StoreLastFolder = ConfigYesNo(default = True)
 myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
 myConfig.PlayerOn = NoSave( ConfigYesNo(default = False))
@@ -64,8 +64,8 @@ F3 - change type font\n\
 F4 - change color font\n\
 T - show/hide subtitle\n\
 D - Download subtitles\n\
-F5/SPACE - show about\n\
-OK - infobar\n\
+SPACE - show about\n\
+F5/OK - infobar\n\
 audio - change audio track\n\
 ")
 else:
@@ -1181,7 +1181,8 @@ class AdvancedFreePlayerStart(Screen):
     def selectFile(self):
         selection = self["filelist"].getSelection()
         if selection[1] == True: # isDir
-            if len(selection[0]) > len(self.filelist.getCurrentDirectory()) or self.LastFolderSelected == None:
+            if selection[0] is not None and self.filelist.getCurrentDirectory() is not None and \
+                    len(selection[0]) > len(self.filelist.getCurrentDirectory()) or self.LastFolderSelected == None:
                 self.LastFolderSelected = selection[0]
                 self["filelist"].changeDir(selection[0], "FakeFolderName")
             else:
@@ -1197,6 +1198,10 @@ class AdvancedFreePlayerStart(Screen):
             self["myPath"].setText(d)
         else:
             d = self.filelist.getCurrentDirectory()
+            if d is None:
+                d=""
+            elif not d.endswith('/'):
+                d +='/'
             f = self.filelist.getFilename()
             printDEBUG("self.selectFile>> " + d + f)
             temp = self.getExtension(f)

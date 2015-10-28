@@ -6,12 +6,12 @@
     <key id="KEY_HOME" mapto="ExitPlayer" flags="m" />
     <key id="KEY_STOP" mapto="ExitPlayer" flags="m" />
     <key id="KEY_HELP" mapto="HelpScreen" flags="b" />      
-    <key id="KEY_INFO" mapto="HelpScreen" flags="b" />
     <key id="KEY_MENU" mapto="HelpScreen" flags="b" />
     <key id="KEY_UP" mapto="MoveSubsUp" flags="m" />
     <key id="KEY_DOWN" mapto="MoveSubsDown" flags="m" />
     <key id="KEY_LEFT" mapto="SetSmallerFont" flags="m" />
     <key id="KEY_RIGHT" mapto="SetBiggerFont" flags="m" />
+    <key id="KEY_INFO" mapto="ToggleInfobar" flags="b" />
     <key id="KEY_OK" mapto="ToggleInfobar" flags="m" />
     <key id="KEY_GREEN" mapto="toggleFontBackground" flags="m" />
     <key id="KEY_YELLOW" mapto="ToggleFont" flags="m" />
@@ -37,6 +37,7 @@
     <key id="KEY_PAGEDOWN" mapto="SeekDownSubtitles" flags="m" />
 
     <key id="KEY_TV" mapto="ToggleSubtitles" flags="m" />
+    <key id="KEY_GOTO" mapto="ToggleSubtitles" flags="m" />
     <key id="KEY_TEXT" mapto="SelectSubtitles" flags="m" />
     <key id="KEY_RADIO" mapto="SelectSubtitles" flags="m" />
     <key id="KEY_AUDIO" mapto="SelectAudio" flags="m" />
@@ -50,6 +51,7 @@
     <key id="KEY_PLAY" mapto="PlayMovie" flags="m" />
     <key id="KEY_RED" mapto="PlayMovie" flags="m" />
     <key id="KEY_GREEN" mapto="runDMnapi" flags="m" />
+    <key id="KEY_TEXT" mapto="runDMnapi" flags="m" />
     <key id="KEY_YELLOW" mapto="runConfig" flags="m" />
     <key id="KEY_MENU" mapto="runConfig" flags="b" />
     <key id="KEY_BLUE" mapto="setSort" flags="m" />
@@ -59,7 +61,6 @@
     <key id="KEY_RIGHT" mapto="pageDown" flags="m" />
     <key id="KEY_PAGEUP" mapto="pageUp" flags="m" />
     <key id="KEY_PAGEDOWN" mapto="pageDown" flags="m" />
-    <key id="KEY_TEXT" mapto="runDMnapi" flags="m" />
   </map>
   
   <map context="AdvancedFreePlayerInfobar">
@@ -67,6 +68,7 @@
     <key id="KEY_EXIT" mapto="CloseInfobar" flags="m" />
     <key id="KEY_HOME" mapto="CloseInfobar" flags="m" />
     <key id="KEY_OK" mapto="CloseInfobar" flags="m" />
+    <key id="KEY_INFO" mapto="CloseInfobar" flags="m" /> 
   </map>
   
   <map context="AdvancedFreePlayerPauseInfobar">
