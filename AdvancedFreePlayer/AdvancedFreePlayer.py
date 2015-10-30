@@ -103,12 +103,15 @@ class AdvancedFreePlayerInfobar(Screen):
             self["actions"] = ActionMap(["AdvancedFreePlayerInfobar"],
             {
                 "CloseInfobar": self.CloseInfobar,
+                "CloseAndStop": self.CloseAndStop,
+                "CloseAndTogglePause": self.CloseAndTogglePause,
             },-2)
             self.onShown.append(self.__LayoutFinish)
         else:
             self["actions"] = ActionMap(["AdvancedFreePlayerPauseInfobar"],
             {
-                "unPause": self.CloseInfobar,
+                "unPause": self.unPause,
+                "CloseAndStop": self.CloseAndStop,
             },-2)
             self.onShown.append(self.__PauseLayoutFinish)
         
@@ -121,6 +124,15 @@ class AdvancedFreePlayerInfobar(Screen):
     def __PauseLayoutFinish(self):
         printDEBUG('AdvancedFreePlayerInfobar in pause')
 
+    def unPause(self):
+        self.close('unPause')
+        
+    def CloseAndStop(self):
+        self.close('StopPlayer')
+        
+    def CloseAndTogglePause(self):
+        self.close('togglePause')
+        
     def CloseInfobar(self):
         self.close()
 
@@ -936,10 +948,17 @@ class AdvancedFreePlayer(Screen):
 
 ##################################################################### TOGGLE INFOBAR >>>>>>>>>>
 
-    def ToggleInfobar(self): #### old info
-        def RetFromInfobar():
-            pass
-        self.session.openWithCallback(RetFromInfobar,AdvancedFreePlayerInfobar)
+    def ToggleInfobar(self, inPause=False): #### old info
+        def RetFromInfobar( ret = None):
+            if ret:
+                if ret == 'togglePause':
+                    self.togglePause()
+                elif ret == 'StopPlayer':
+                    self.ExitPlayer()
+                elif ret == 'unPause':
+                    self.play()
+                  
+        self.session.openWithCallback(RetFromInfobar,AdvancedFreePlayerInfobar,isPause = inPause)
         return
 ##################################################################### TOGGLE FONT BACKGROUND >>>>>>>>>>
     def toggleFontBackground(self):
@@ -986,10 +1005,10 @@ class AdvancedFreePlayer(Screen):
         pauseable.pause()
         self.stateplay = "Pause"
         if myConfig.InfobarOnPause.value == True and ShowInfobar == True:
-            self.session.openWithCallback(self.play,AdvancedFreePlayerInfobar,isPause = True)
+            self.ToggleInfobar(inPause=True)
             return
 
-    def play(self):
+    def play(self, ret = None):
         if not self.stateplay == "Pause":
             return
         cs = self.session.nav.getCurrentService()

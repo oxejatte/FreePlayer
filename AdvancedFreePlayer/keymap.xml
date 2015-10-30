@@ -64,14 +64,20 @@
   </map>
   
   <map context="AdvancedFreePlayerInfobar">
-    <key id="KEY_ESC" mapto="CloseInfobar" flags="m" />
-    <key id="KEY_EXIT" mapto="CloseInfobar" flags="m" />
-    <key id="KEY_HOME" mapto="CloseInfobar" flags="m" />
+    <key id="KEY_ESC" mapto="CloseAndStop" flags="m" />
+    <key id="KEY_EXIT" mapto="CloseAndStop" flags="m" />
+    <key id="KEY_HOME" mapto="CloseAndStop" flags="m" />
     <key id="KEY_OK" mapto="CloseInfobar" flags="m" />
     <key id="KEY_INFO" mapto="CloseInfobar" flags="m" /> 
+    <key id="KEY_RED" mapto="CloseAndTogglePause" flags="m" />
+    <key id="KEY_PLAY" mapto="CloseAndTogglePause" flags="m" />
+    <key id="KEY_PAUSE" mapto="CloseAndTogglePause" flags="m" />
   </map>
   
   <map context="AdvancedFreePlayerPauseInfobar">
+    <key id="KEY_ESC" mapto="CloseAndStop" flags="m" />
+    <key id="KEY_EXIT" mapto="CloseAndStop" flags="m" />
+    <key id="KEY_HOME" mapto="CloseAndStop" flags="m" />
     <key id="KEY_RED" mapto="unPause" flags="m" />
     <key id="KEY_PLAY" mapto="unPause" flags="m" />
     <key id="KEY_PAUSE" mapto="unPause" flags="m" />
