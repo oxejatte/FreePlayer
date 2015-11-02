@@ -10,10 +10,10 @@ from Screens.MessageBox import MessageBox
 from Components.Label import Label
 from Components.ActionMap import ActionMap
 from Components.Pixmap import Pixmap
+from Components.ServiceEventTracker import ServiceEventTracker
 from Components.Sources.StaticText import StaticText
 #from Components.ProgressBar import ProgressBar
 from Components.config import *
-#from Components.ServiceEventTracker import ServiceEventTracker
 #from Components.GUIComponent import GUIComponent
 #from Components.Converter.ConditionalShowHide import ConditionalShowHide
 from Tools.LoadPixmap import LoadPixmap
@@ -155,11 +155,9 @@ class AdvancedFreePlayer(Screen):
         self.seeksubtitle = 0
         self.resume_point = 0
         self.nrsubtitle = 0
-        self.enablesubtitle = True
         self.statesubtitle = self.HIDDENSUBTITLE
         self.stateplay = ""
         self.stateinfo = self.VISIBLE
-        self.oldinfo = ""
         self.openmovie = openmovie
         self.opensubtitle = opensubtitle
         self.rootID = int(rootID)
@@ -168,27 +166,22 @@ class AdvancedFreePlayer(Screen):
         self.fontpos = 540
         self.fontsize = 60
         self.SubtitleLineHeight=66
-        self.fontpos_ = self.fontpos
         self.osdPosX = 0
         self.osdPosY = 0
-        self.osdPosX_ = self.osdPosX
-        self.osdPosY_ = self.osdPosY
-        self.fontsize_ = self.fontsize
         self.fonttype_nr = 0
-        self.fonttype_nr_ = self.fonttype_nr
         self.fontcolor_nr = 0
-        self.fontcolor_nr_ = self.fontcolor_nr
         self.fontbackground_nr = 0
-        self.fontbackground_nr_ = self.fontbackground_nr
         self.fontBackgroundState = 1
-        self.fontBackgroundState_ = self.fontBackgroundState
         #load
         self.loadfont()
         self.loadcolor()
         self.loadBackgroundColor()
         self.loadconfig()
+        
         if self.opensubtitle == "":
             self.enablesubtitle = False
+        else:
+            self.enablesubtitle = True
 
         isHD = False
         isWideScreen = False
@@ -235,6 +228,13 @@ class AdvancedFreePlayer(Screen):
             self.LastPlayedService = self.session.nav.getCurrentlyPlayingServiceReference()
             self.session.nav.stopService()
         self.session.nav.stopService()
+        self.__event_tracker = ServiceEventTracker(screen=self, eventmap=
+            {
+                #iPlayableService.evSeekableStatusChanged: self.__seekableStatusChanged,
+                iPlayableService.evStart: self.resumeLastPlayback,
+                #iPlayableService.evEOF: self.__evEOF,
+                #iPlayableService.evSOF: self.__evSOF,
+            })
 
     def __onClose(self):
         myConfig.Inits.value = str(self.fontpos) + "," + str(self.fontsize) + "," + \
@@ -243,7 +243,7 @@ class AdvancedFreePlayer(Screen):
         myConfig.Inits.save()
 
         if self.LastPlayedService:
-            self.session.nav.playService(self.LastPlayedService)
+            self.session.nav.playService(self.LastPlayedService, forceRestart=True)
 
     def __LayoutFinish(self):
         #print "--> Start of __LayoutFinish"
@@ -264,10 +264,12 @@ class AdvancedFreePlayer(Screen):
     def resumeLastPlayback(self):
         #printDEBUG("resumeLastPlayback>>>")
         if not self.ENABLE_RESUME_SUPPORT:
+            printDEBUG("resumeLastPlayback ENABLE_RESUME_SUPPORT=false")
             return
 
         cue = self.__getCuesheet()
         if cue is None:
+            printDEBUG("resumeLastPlayback cue=None")
             return
         cut_list = cue.getCutList()
         print cut_list
@@ -285,7 +287,7 @@ class AdvancedFreePlayer(Screen):
         if seekable is None:
             return  # Should not happen?
         length = seekable.getLength() or (None, 0)
-        print "seekable.getLength() returns:", length
+        printDEBUG("resumeLastPlayback: seekable.getLength() returns: %d" % length)
         # Hmm, this implies we don't resume if the length is unknown...
         if (last > 900000) and (not length[1]  or (last < length[1] - 900000)):
             self.resume_point = last
@@ -295,7 +297,7 @@ class AdvancedFreePlayer(Screen):
     def playLastCB(self, answer):
         if answer == True:
             try:
-                print "resuming from %d" % (self.resume_point/90000)
+                printDEBUG("resuming from %d" % (self.resume_point/90000))
                 self.doSeek(self.resume_point)
             except:
                 pass
@@ -931,6 +933,8 @@ class AdvancedFreePlayer(Screen):
 
 ##################################################################### CHANGE FONT SIZE >>>>>>>>>>
     def setFontSize(self, fontSize):
+        if self.opensubtitle == '':
+            return
         self.fontsize = self.fontsize + fontSize
         if self.fontsize < 10:
             self.fontsize = 10
@@ -962,6 +966,8 @@ class AdvancedFreePlayer(Screen):
         return
 ##################################################################### TOGGLE FONT BACKGROUND >>>>>>>>>>
     def toggleFontBackground(self):
+        if self.opensubtitle == '':
+            return
         self.fontbackground_nr = self.fontbackground_nr + 1
         if self.fontbackground_nr == len(self.backgroundcolor_list):
             self.fontbackground_nr = 0
@@ -970,6 +976,8 @@ class AdvancedFreePlayer(Screen):
       
 ##################################################################### TOGGLE FONT COLOR >>>>>>>>>>
     def ToggleFontColor(self):
+        if self.opensubtitle == '':
+            return
         self.fontcolor_nr = self.fontcolor_nr + 1
         if self.fontcolor_nr == len(self.fontcolor_list):
             self.fontcolor_nr = 0
@@ -979,6 +987,8 @@ class AdvancedFreePlayer(Screen):
 
 ##################################################################### TOGGLE FONT  >>>>>>>>>>
     def ToggleFont(self):
+        if self.opensubtitle == '':
+            return
         self.fonttype_nr = self.fonttype_nr + 1
         if self.fonttype_nr == len(self.fonttype_list):
             self.fonttype_nr = 0
@@ -1115,7 +1125,7 @@ class AdvancedFreePlayerStart(Screen):
 
     def ClearCuts(self, ret):
         if ret == False:
-            remove(self.openmovie + '.cuts')
+            resetMoviePlayState(self.openmovie + '.cuts')
         self.SelectFramework()
 
     def SelectFramework(self):
@@ -1430,4 +1440,25 @@ def getNameWithoutExtension(MovieNameWithExtension):
     extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
     return MovieNameWithExtension[: -extLenght]
 
-    
+import struct
+cutsParser = struct.Struct('>QI') # big-endian, 64-bit PTS and 32-bit type
+def resetMoviePlayState(cutsFileName):
+    printDEBUG('resetMoviePlayState >>>')
+    return
+    try:
+        f = open(cutsFileName, 'rb')
+        cutlist = []
+        while 1:
+            data = f.read(cutsParser.size)
+            if len(data) < cutsParser.size:
+                break
+            cut, cutType = cutsParser.unpack(data)
+            if cutType != 32:
+                cutlist.append(data)
+        f.close()
+        f = open(cutsFileName, 'wb')
+        #f.write(''.join(cutlist))
+        printDEBUG(''.join(cutlist))
+        f.close()
+    except:
+        pass
