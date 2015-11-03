@@ -679,17 +679,19 @@ class AdvancedFreePlayer(Screen):
                         l = l1
                     l = self.usun(l)
                     l = self.usun(l)
-                    tim1=tim[0:12]
-                    tim1_h = tim1[0:2]
-                    tim1_m = tim1[3:5]
-                    tim1_s = tim1[6:8]
-                    tim1_ms = tim1[9:12]
+                    tim1=tim.split(' ')[0]
+                    tim1_h = tim1.split(':')[0]
+                    tim1_m = tim1.split(':')[1]
+                    tim1_s = tim1.split(':')[2].split(',')[0]
+                    tim1_ms = tim1.split(':')[2].split(',')[1]
+                    if int(nr) == 1176:
+                        printDEBUG(tim1_h)
                     tim_1 = ((((int(tim1_h) * 3600) + (int(tim1_m) * 60) + int(tim1_s))*1000)+int(tim1_ms))*90
-                    tim2=tim[17:29]
-                    tim2_h = tim2[0:2]
-                    tim2_m = tim2[3:5]
-                    tim2_s = tim2[6:8]
-                    tim2_ms = tim2[9:12]
+                    tim2=tim.split('>')[1].strip()
+                    tim2_h = tim2.split(':')[0]
+                    tim2_m = tim2.split(':')[1]
+                    tim2_s = tim2.split(':')[2].split(',')[0]
+                    tim2_ms = tim2.split(':')[2].split(',')[1]
                     tim_2 = ((((int(tim2_h) * 3600) + (int(tim2_m) * 60) + int(tim2_s))*1000)+int(tim2_ms))*90
                     self.subtitle.append([int(nr),tim_1,tim_2,l])
                 o.close()
@@ -697,7 +699,7 @@ class AdvancedFreePlayer(Screen):
             if myConfig.Version == "debug":
                 raise
             self.subtitle = []
-            printDEBUG("Error loadsrt %s" % str(e) )
+            printDEBUG("Error loadsrt %s at subtitle %d ('%s' > '%s'" % (str(e),int(nr),tim1,tim2) )
             try:
                 o.close()
             except:
