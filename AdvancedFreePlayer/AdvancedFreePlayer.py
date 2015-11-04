@@ -26,8 +26,6 @@ from skin import parseColor,parseFont
 from time import *
 from FileList2 import FileList
 
-#import subprocess,fcntl
-
 config.plugins.AdvancedFreePlayer = ConfigSubsection()
 myConfig = config.plugins.AdvancedFreePlayer
 myConfig.FileListFontSize = ConfigSelectionNumber(20, 32, 2, default = 24)
@@ -50,6 +48,16 @@ myConfig.StoreLastFolder = ConfigYesNo(default = True)
 myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False)
 myConfig.PlayerOn = NoSave( ConfigYesNo(default = False))
 #position,size,type,color,visibility,background
+
+
+#iVOD
+myConfig.iVODactivated = ConfigYesNo(default = False)
+myConfig.iVODautoDownloadCovers = ConfigYesNo(default = True)
+myConfig.iVODautoDownloadDescriptions = ConfigYesNo(default = True)
+myConfig.iVODpath = ConfigText(default = myConfig.FileListLastFolder.value + "/iVOD/", fixed_size = False)
+myConfig.iVODdailyMoviesSync = ConfigYesNo(default = False)
+myConfig.iVODsearch4movie = NoSave(ConfigText(default = "", fixed_size = False))
+
 
 if path.exists('/usr/local/e2/'):
   KeyMapInfo=_("Player KEYMAP:\n\n\
@@ -150,7 +158,6 @@ class AdvancedFreePlayer(Screen):
     def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService, URLlinkName = ''):
         self.conditionalNotVisible = []
         self.URLlinkName = URLlinkName
-        self.PercentagePlayed = 0
         self.frameon = 1 / 24
         self.seeksubtitle = 0
         self.resume_point = 0
@@ -226,7 +233,6 @@ class AdvancedFreePlayer(Screen):
         self.onClose.append(self.__onClose)
         if not self.LastPlayedService:
             self.LastPlayedService = self.session.nav.getCurrentlyPlayingServiceReference()
-            self.session.nav.stopService()
         self.session.nav.stopService()
         self.__event_tracker = ServiceEventTracker(screen=self, eventmap=
             {
@@ -409,12 +415,12 @@ class AdvancedFreePlayer(Screen):
                 self.nrsubtitle = nr
                 self.setTextForAllLInes(text)
                 self.statesubtitle = self.SHOWNSUBTITLE
-                printDEBUG ("%d Show %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
+                #printDEBUG ("%d Show %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
             elif tim > stop and nr == self.nrsubtitle:
                 if self.statesubtitle == self.SHOWNSUBTITLE:
                     self.setTextForAllLInes("")
                     self.statesubtitle = self.HIDDENSUBTITLE
-                    printDEBUG ("%d Hide %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
+                    #printDEBUG ("%d Hide %d %d --> %d\t%s" %(tim, nr, start, stop, text) )
 
     def usun(self,l):
         if len(l) > 0:
@@ -426,6 +432,7 @@ class AdvancedFreePlayer(Screen):
         return l
 
     def loadsubtitle(self):
+        with open("/proc/sys/vm/drop_caches", "w") as f: f.write("1\n")
         if self.opensubtitle.startswith('http://') and path.exists('/usr/bin/curl') and self.opensubtitle.endswith('.srt'):
             printDEBUG("Downloading http srt subtitles from %s" % self.opensubtitle)
             system('curl -kLs  %s -o /tmp/afpsubs.srt' % self.opensubtitle) 
@@ -876,8 +883,9 @@ class AdvancedFreePlayer(Screen):
             self.timer.stop()
         except:
             pass
+        PercentagePlayed =  int( self.GetCurrentPosition() / float(self.GetCurrentLength()) * 100)
         self.session.nav.stopService()
-        print "Played %d" % self.PercentagePlayed
+        printDEBUG ("Played %d%%" % PercentagePlayed)
         if self.URLlinkName == '' and not access(self.openmovie, W_OK):
             printDEBUG("No access to delete %s" % self.openmovie)
         elif self.URLlinkName != '' and not access(self.URLlinkName, W_OK):
@@ -885,7 +893,7 @@ class AdvancedFreePlayer(Screen):
         if path.exists('/tmp/afpsubs.srt'):    
             DeleteFile('/tmp/afpsubs.srt')
             
-        elif myConfig.DeleteFileQuestion.value == True or (self.PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
+        elif myConfig.DeleteFileQuestion.value == True or (PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
             def ExitRet(ret):
                 if ret:
                     if self.URLlinkName == '':
@@ -1264,8 +1272,6 @@ class AdvancedFreePlayerStart(Screen):
                 if self["filemovie"].getText() != (self.movietxt + self.openmovie):
                     self["filemovie"].setText(self.movietxt + self.openmovie)
                     self["filesubtitle"].setText(self.subtitletxt + self.opensubtitle)
-                    global PercentagePlayed
-                    PercentagePlayed = 0
                 elif myConfig.KeyOK.value == 'play':
                     self.PlayMovie()
                     return
@@ -1291,8 +1297,6 @@ class AdvancedFreePlayerStart(Screen):
                         self.openmovie = ''
                         self["filemovie"].setText(self.movietxt)
                 else:
-                    global PercentagePlayed
-                    PercentagePlayed = 0
                     self.openmovie = d + f
                     self["filemovie"].setText(self.movietxt + f)
                     self.URLlinkName = ''
