@@ -269,7 +269,7 @@ class AdvancedFreePlayer(Screen):
 
         cue = self.__getCuesheet()
         if cue is None:
-            printDEBUG("resumeLastPlayback cue=None")
+            #printDEBUG("resumeLastPlayback cue=None")
             return
         cut_list = cue.getCutList()
         print cut_list
@@ -287,7 +287,7 @@ class AdvancedFreePlayer(Screen):
         if seekable is None:
             return  # Should not happen?
         length = seekable.getLength() or (None, 0)
-        printDEBUG("resumeLastPlayback: seekable.getLength() returns: %d" % length)
+        printDEBUG("resumeLastPlayback: seekable.getLength() returns: %d" % length[1])
         # Hmm, this implies we don't resume if the length is unknown...
         if (last > 900000) and (not length[1]  or (last < length[1] - 900000)):
             self.resume_point = last
