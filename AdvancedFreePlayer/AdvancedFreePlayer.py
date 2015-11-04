@@ -426,6 +426,23 @@ class AdvancedFreePlayer(Screen):
         return l
 
     def loadsubtitle(self):
+        if self.opensubtitle.startswith('http://') and path.exists('/usr/bin/curl') and self.opensubtitle.endswith('.srt'):
+            printDEBUG("Downloading http srt subtitles from %s" % self.opensubtitle)
+            system('curl -kLs  %s -o /tmp/afpsubs.srt' % self.opensubtitle) 
+            self.opensubtitle = '/tmp/afpsubs.srt'
+        elif self.opensubtitle.startswith('ftp://') and path.exists('/usr/bin/curl') and self.opensubtitle.endswith('.srt'):
+            printDEBUG("Downloading ftp srt subtitles from %s" % self.opensubtitle)
+            system('curl -kLs --ftp-pasv %s -o /tmp/afpsubs.srt' % self.opensubtitle)
+            self.opensubtitle = '/tmp/afpsubs.srt'
+        elif self.opensubtitle.startswith('http://') and path.exists('/usr/bin/curl') and self.opensubtitle.endswith('.txt'):
+            printDEBUG("Downloading http txt subtitles from %s" % self.opensubtitle)
+            system('curl -kLs  %s -o /tmp/afpsubs.txt' % self.opensubtitle) 
+            self.opensubtitle = '/tmp/afpsubs.txt'
+        elif self.opensubtitle.startswith('ftp://') and path.exists('/usr/bin/curl') and self.opensubtitle.endswith('.txt'):
+            printDEBUG("Downloading ftp txt subtitles from %s" % self.opensubtitle)
+            system('curl -kLs --ftp-pasv %s -o /tmp/afpsubs.txt' % self.opensubtitle)
+            self.opensubtitle = '/tmp/afpsubs.txt'
+            
         if path.exists(self.opensubtitle):
             temp = self.opensubtitle[-4:]
             if temp == ".srt":
@@ -684,8 +701,6 @@ class AdvancedFreePlayer(Screen):
                     tim1_m = tim1.split(':')[1]
                     tim1_s = tim1.split(':')[2].split(',')[0]
                     tim1_ms = tim1.split(':')[2].split(',')[1]
-                    if int(nr) == 1176:
-                        printDEBUG(tim1_h)
                     tim_1 = ((((int(tim1_h) * 3600) + (int(tim1_m) * 60) + int(tim1_s))*1000)+int(tim1_ms))*90
                     tim2=tim.split('>')[1].strip()
                     tim2_h = tim2.split(':')[0]
@@ -696,8 +711,6 @@ class AdvancedFreePlayer(Screen):
                     self.subtitle.append([int(nr),tim_1,tim_2,l])
                 o.close()
         except Exception as e:
-            if myConfig.Version == "debug":
-                raise
             self.subtitle = []
             printDEBUG("Error loadsrt %s at subtitle %d ('%s' > '%s'" % (str(e),int(nr),tim1,tim2) )
             try:
