@@ -88,6 +88,9 @@ fi
 
 echo "_(Installing new version...)"
 if [ ! -e /DuckboxDisk ]; then
+  if `grep -q 'config.plugins.AdvancedFreePlayer.freeIPTVintegration' < /etc/enigma2/settings`;then
+    rm -rf /tmp/$version/freeIPTV
+  fi
   rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/j00zek-FreePlayer-* 2>/dev/null
   touch /tmp/$version/AdvancedFreePlayer/$version 2>/dev/null
   cp -a /tmp/$version/AdvancedFreePlayer/* /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/

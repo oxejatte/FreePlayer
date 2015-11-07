@@ -49,12 +49,18 @@ myConfig.Inits = ConfigText(default = "540,60,Regular,0,1,0", fixed_size = False
 myConfig.PlayerOn = NoSave( ConfigYesNo(default = False))
 #position,size,type,color,visibility,background
 
+#Extras
+myConfig.AutoDownloadCoversDescriptions = ConfigYesNo(default = True)
+myConfig.MovieSearchTree = ConfigText(default = "/hdd/movie/", fixed_size = False)
 
+#ToDo
+myConfig.freeIPTVintegration = ConfigYesNo(default = True)
+myConfig.CacheStreams = ConfigYesNo(default = False)
 #iVOD
 myConfig.iVODactivated = ConfigYesNo(default = False)
 myConfig.iVODautoDownloadCovers = ConfigYesNo(default = True)
 myConfig.iVODautoDownloadDescriptions = ConfigYesNo(default = True)
-myConfig.iVODpath = ConfigText(default = myConfig.FileListLastFolder.value + "/iVOD/", fixed_size = False)
+myConfig.iVODpath = ConfigText(default = "/hdd/movie/iVOD/", fixed_size = False)
 myConfig.iVODdailyMoviesSync = ConfigYesNo(default = False)
 myConfig.iVODsearch4movie = NoSave(ConfigText(default = "", fixed_size = False))
 

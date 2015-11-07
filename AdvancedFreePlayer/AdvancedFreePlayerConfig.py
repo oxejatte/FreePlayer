@@ -58,6 +58,7 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         self.list.append(getConfigListEntry(_("Key OK behavior:"), config.plugins.AdvancedFreePlayer.KeyOK))
         self.list.append(getConfigListEntry(_("Ask for file removal when % played (0=off):"), config.plugins.AdvancedFreePlayer.DeleteWhenPercentagePlayed))
         self.list.append(getConfigListEntry(_("Always ask for file removal:"), config.plugins.AdvancedFreePlayer.DeleteFileQuestion))
+        self.list.append(getConfigListEntry(_("Integrate with freeIPTV:"), config.plugins.AdvancedFreePlayer.freeIPTVintegration))
         
         self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("--- Infobar settings ---"), config.plugins.AdvancedFreePlayer.separator))
@@ -70,7 +71,7 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         
         self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("--- Advanced settings ---"), config.plugins.AdvancedFreePlayer.separator))
-        self.list.append(getConfigListEntry(_("Download:"), config.plugins.AdvancedFreePlayer.Version))
+        self.list.append(getConfigListEntry(_("Download:"), config.plugins.AdvancedFreePlayer.Version)) #debug|public
         self.list.append(getConfigListEntry(_("MultiFramework selection (sh4 only):"), config.plugins.AdvancedFreePlayer.MultiFramework))
         
         self["config"].list = self.list        
