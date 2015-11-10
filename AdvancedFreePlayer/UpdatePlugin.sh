@@ -27,10 +27,12 @@ if [ $? -gt 0 ]; then
   fi
 fi
 
-echo "_(Checking installation mode...)"
-if `opkg list-installed 2>/dev/null | tr '[:upper:]' '[:lower:]'| grep -q 'advancedfreeplayer'`;then
-  echo "_(AdvancedFreePlayer controlled by OPKG. Please use it for updates.)"
-  exit 0
+if [ "$UpdateType" != "public" ]; then # in debug mode we download data directly from GIT server
+  echo "_(Checking installation mode...)"
+  if `opkg list-installed 2>/dev/null | tr '[:upper:]' '[:lower:]'| grep -q 'advancedfreeplayer'`;then
+    echo "_(AdvancedFreePlayer controlled by OPKG. Please use it for updates.)"
+    exit 0
+  fi
 fi
 
 echo "_(Checking internet connection...)"
@@ -88,7 +90,7 @@ fi
 
 echo "_(Installing new version...)"
 if [ ! -e /DuckboxDisk ]; then
-  if `grep -q 'config.plugins.AdvancedFreePlayer.freeIPTVintegration' < /etc/enigma2/settings`;then
+  if ! `grep -q 'config.plugins.AdvancedFreePlayer.freeIPTVintegration' < /etc/enigma2/settings`;then
     rm -rf /tmp/$version/freeIPTV
   fi
   rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/j00zek-FreePlayer-* 2>/dev/null

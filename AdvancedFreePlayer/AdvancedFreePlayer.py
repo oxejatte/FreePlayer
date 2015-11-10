@@ -54,7 +54,7 @@ myConfig.AutoDownloadCoversDescriptions = ConfigYesNo(default = True)
 myConfig.MovieSearchTree = ConfigText(default = "/hdd/movie/", fixed_size = False)
 
 #ToDo
-myConfig.freeIPTVintegration = ConfigYesNo(default = True)
+myConfig.freeIPTVintegration = ConfigYesNo(default = False)
 myConfig.CacheStreams = ConfigYesNo(default = False)
 #iVOD
 myConfig.iVODactivated = ConfigYesNo(default = False)
