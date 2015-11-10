@@ -1,0 +1,8 @@
+<keymap>
+        <map context="freeIPTVListActions">
+                <key id="KEY_MENU" mapto="menu" flags="m" />
+                <key id="KEY_INFO" mapto="info" flags="m" />
+                <key id="KEY_HELP" mapto="info" flags="m" />
+                <key id="KEY_PLAY" mapto="play" flags="m" />
+        </map> 
+</keymap>
