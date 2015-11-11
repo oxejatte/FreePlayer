@@ -161,7 +161,7 @@ class AdvancedFreePlayer(Screen):
     SHOWNSUBTITLE = 6
     HIDDENSUBTITLE = 7
 
-    def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService, URLlinkName = ''):
+    def __init__(self, session,openmovie,opensubtitle, rootID, LastPlayedService, URLlinkName = '', movieTitle=''):
         self.conditionalNotVisible = []
         self.URLlinkName = URLlinkName
         self.frameon = 1 / 24
@@ -172,6 +172,12 @@ class AdvancedFreePlayer(Screen):
         self.stateplay = ""
         self.stateinfo = self.VISIBLE
         self.openmovie = openmovie
+        
+        if movieTitle == '':
+            self.movieTitle = self.openmovie
+        else:
+            self.movieTitle = movieTitle
+            
         self.opensubtitle = opensubtitle
         self.rootID = int(rootID)
         self.LastPlayedService = LastPlayedService
@@ -321,6 +327,7 @@ class AdvancedFreePlayer(Screen):
         self.timer.start(200, False)
         printDEBUG("Playing: " + str(self.rootID) + ":0:0:0:0:0:0:0:0:0:" + self.openmovie)
         root = eServiceReference(self.rootID, 0, self.openmovie)
+        root.setName (self.movieTitle)
         self.session.nav.playService(root)
         myConfig.PlayerOn.value = True
         self.stateplay = "Play"
@@ -889,7 +896,10 @@ class AdvancedFreePlayer(Screen):
             self.timer.stop()
         except:
             pass
-        PercentagePlayed =  int( self.GetCurrentPosition() / float(self.GetCurrentLength()) * 100)
+        try:
+            PercentagePlayed =  int( self.GetCurrentPosition() / float(self.GetCurrentLength()) * 100)
+        except:
+            PercentagePlayed = 0
         self.session.nav.stopService()
         printDEBUG ("Played %d%%" % PercentagePlayed)
         if self.URLlinkName == '' and not access(self.openmovie, W_OK):
@@ -899,7 +909,9 @@ class AdvancedFreePlayer(Screen):
         if path.exists('/tmp/afpsubs.srt'):    
             DeleteFile('/tmp/afpsubs.srt')
             
-        elif myConfig.DeleteFileQuestion.value == True or (PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and int(myConfig.DeleteWhenPercentagePlayed.value) >0):
+        elif myConfig.DeleteFileQuestion.value == True or (PercentagePlayed >= int(myConfig.DeleteWhenPercentagePlayed.value) and \
+            int(myConfig.DeleteWhenPercentagePlayed.value) >0) and self.openmovie.find('iptv_buffering') != -1:
+            printDEBUG(self.openmovie)
             def ExitRet(ret):
                 if ret:
                     if self.URLlinkName == '':
@@ -1070,6 +1082,109 @@ class AdvancedFreePlayer(Screen):
 
     def MoveSubsDown(self):
         self.updateSubtitlePosition(+5)
+
+##################################################################### CLASS END #####################################################################
+class AdvancedFreePlayerStarter(Screen):
+
+    def __init__(self, session, openmovie, movieTitle):
+        #printDEBUG("AdvancedFreePlayerStarter >>>")
+        self.sortDate = False
+        self.openmovie = openmovie
+        self.movieTitle = movieTitle
+        self.opensubtitle = ''
+        self.URLlinkName = ''
+        self.rootID = myConfig.MultiFramework.value
+        self.LastPlayedService = None
+  
+        if path.exists(ExtPluginsPath + '/DMnapi/DMnapi.pyo') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.pyc') or path.exists(ExtPluginsPath +'/DMnapi/DMnapi.py'):
+            self.DmnapiInstalled = True
+        else:
+            self.DmnapiInstalled = False
+            
+        #self.skin  = LoadSkin("AdvancedFreePlayerStart")
+        
+        Screen.__init__(self, session)
+        self.onShow.append(self.PlayMovie)
+
+    def PlayMovie(self):
+        self.onShow.remove(self.PlayMovie)
+        if not self.openmovie == "":
+            if not path.exists(self.openmovie + '.cuts'):
+                self.SelectFramework()
+            elif path.getsize(self.openmovie + '.cuts') == 0:
+                self.SelectFramework()
+            else:
+                self.session.openWithCallback(self.ClearCuts, MessageBox, _("Do you want to resume this playback?"), timeout=10, default=True)
+
+    def ClearCuts(self, ret):
+        if ret == False:
+            resetMoviePlayState(self.openmovie + '.cuts')
+        self.SelectFramework()
+
+    def SelectFramework(self):
+        if myConfig.MultiFramework.value == "select":
+            from Screens.ChoiceBox import ChoiceBox
+            self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),("Hardware (root 1)","1"),])
+        else:
+            if self.openmovie.endswith('.ts'):
+                self.rootID = '1'
+            else:
+                self.rootID = myConfig.MultiFramework.value
+            self.StartPlayer()
+
+    def SelectedFramework(self, ret):
+        if ret:
+            self.rootID = ret[1]
+            printDEBUG("Selected framework: " + ret[1])
+        self.StartPlayer()
+      
+    def StartPlayer(self):
+        self.lastOPLIsetting = None
+        self.lastDMNAPIsetting = None
+        
+        if not path.exists(self.opensubtitle) and not self.opensubtitle.startswith("http://"):
+            self.opensubtitle = ""
+        if path.exists(self.openmovie) or self.openmovie.startswith("http://"):
+            if myConfig.SRTplayer.value =="system":
+                try: 
+                    self.lastOPLIsetting = config.subtitles.pango_autoturnon.value
+                    config.subtitles.pango_autoturnon.value = True
+                except: pass
+                if self.DmnapiInstalled == True:
+                    try:
+                        self.lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
+                        config.plugins.dmnapi.autosrton.value = True
+                        printDEBUG("DMNapi subtitles enabled")
+                    except: pass
+                self.session.openWithCallback(self.EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
+                return
+            else:
+                try: 
+                    self.lastOPLIsetting = config.subtitles.pango_autoturnon.value
+                    config.subtitles.pango_autoturnon.value = False
+                    printDEBUG("OpenPLI subtitles disabled")
+                except: printDEBUG("pango_autoturnon non existent, is it VTI?")
+                if self.DmnapiInstalled == True:
+                    try:
+                        self.lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
+                        config.plugins.dmnapi.autosrton.value = False
+                        printDEBUG("DMNapi subtitles disabled")
+                    except: pass
+                self.session.openWithCallback(self.EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
+                return
+        else:
+            printDEBUG("StartPlayer>>> File %s does not exist :(" % self.openmovie)
+     
+    def EndPlayer(self):
+        if self.lastOPLIsetting is not None:
+            config.subtitles.pango_autoturnon.valu = self.lastOPLIsetting
+        if self.lastDMNAPIsetting is not None:
+            config.plugins.dmnapi.autosrton.value = self.lastDMNAPIsetting
+        self.ExitPlayer()
+
+    def ExitPlayer(self):
+        myConfig.PlayerOn.value = False
+        self.close()
 ##################################################################### CLASS END #####################################################################
 
 class AdvancedFreePlayerStart(Screen):
@@ -1160,7 +1275,7 @@ class AdvancedFreePlayerStart(Screen):
     def SelectFramework(self):
         if myConfig.MultiFramework.value == "select":
             from Screens.ChoiceBox import ChoiceBox
-            self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),])
+            self.session.openWithCallback(self.SelectedFramework, ChoiceBox, title = _("Select Multiframework"), list = [("gstreamer (root 4097)","4097"),("ffmpeg (root 4099)","4099"),("Hardware (root 1)","1"),])
         else:
             if self.openmovie.endswith('.ts'):
                 self.rootID = '1'
