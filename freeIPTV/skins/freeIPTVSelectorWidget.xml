@@ -1,0 +1,12 @@
+<screen name="freeIPTVSelectorWidget" position="center,center" size="620,440" title="freeIPTVSelectorWidget">
+  <!-- red button -->  
+  <eLabel position="10,10" size="160,35" zPosition="-1" backgroundColor="#20b81c46" />
+  <eLabel position="230,10" size="160,35" zPosition="-1" backgroundColor="#20009f3c" />
+  <!--eLabel position="200,9" size="150,35" zPosition="-10" backgroundColor="#209ca81b" /-->
+  <eLabel position="440,10" size="160,35" zPosition="-1" backgroundColor="#202673ec" />
+    <widget name="key_red"     position="10,10"  zPosition="1"  size="160,35" valign="center"  halign="center"   font="Regular;22" transparent="1" foregroundColor="white" />
+    <widget name="key_blue"    position="230,10"  zPosition="1"  size="160,35" valign="center"  halign="center" font="Regular;22" transparent="1" foregroundColor="white" />
+    <widget name="key_green"   position="440,10"  zPosition="1"  size="160,35" valign="center"  halign="center"  font="Regular;22" transparent="1" foregroundColor="white" />
+    <widget name="curr_dir"    position="10,50"  zPosition="1"  size="600,35" valign="center"  halign="left"   font="Regular;18" transparent="1" foregroundColor="white" />
+    <widget name="filelist"    position="10,85"  zPosition="1"  size="580,335" transparent="1" scrollbarMode="showOnDemand" />
+</screen>

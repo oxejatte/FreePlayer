@@ -7,7 +7,7 @@ PluginName = 'freeIPTV'
 PluginGroup = 'Extensions'
 
 ##### System Imports
-from os import path as os_path, environ as os_environ, listdir as os_listdir, chmod as os_chmod, remove as os_remove
+from os import path as os_path, environ as os_environ, listdir as os_listdir, chmod as os_chmod, remove as os_remove, mkdir as os_mkdir
 import traceback
 
 ###### openPLI imports
