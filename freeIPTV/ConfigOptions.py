@@ -27,15 +27,16 @@ if path.exists('/usr/bin/wget') and not path.islink('/usr/bin/wget'):
     myConfig.wgetpath      = ConfigText(default = '/usr/bin/wget', fixed_size = False)
 else:
     myConfig.wgetpath      = ConfigText(default = '', fixed_size = False)
-    printDBG('No full version of wget found. :( Try to install it running opkg install wget')
 
 if path.exists('/usr/bin/rtmpdump') and not path.islink('/usr/bin/rtmpdump'):
     myConfig.rtmpdumppath  = ConfigText(default = '/usr/bin/rtmpdump', fixed_size = False)
 else:
     myConfig.rtmpdumppath  = ConfigText(default = '', fixed_size = False)
-    printDBG('No full version of rtmpdump found. :( Try to install it running opkg install rtmpdump')
 
-myConfig.f4mdumppath   = ConfigText(default = '', fixed_size = False)
+if path.exists('/usr/bin/f4dump') and not path.islink('/usr/bin/f4dump'):
+    myConfig.f4mdumppath  = ConfigText(default = '/usr/bin/f4dump', fixed_size = False)
+else:
+    myConfig.f4mdumppath  = ConfigText(default = '', fixed_size = False)
 
 myConfig.plarform      = ConfigSelection(default = getPlatform(), choices = [("mipsel", _("mipsel")),("sh4", _("sh4")),("i686", _("i686")),("unknown", _("unknown"))])
 

@@ -20,7 +20,6 @@
   <widget name="console" position="780,256" zPosition="1" size="435,366" font="Regular;24" transparent="1" backgroundColor="#00000000" />
   <widget name="cover" zPosition="2" position="775, 81" size="117,165" alphatest="blend" />     
   <widget name="playerlogo" zPosition="4" position="900,86" size="240,80" alphatest="blend" />
-  <widget name="sequencer" position="0,0" zPosition="6" size="1090,625" font="Regular;160" halign="center" valign="center" transparent="1" backgroundColor="#00000000" />
   <widget name="spinner"   zPosition="2" position="790,225" size="16,16" transparent="1" alphatest="blend" />
   <widget name="spinner_1" zPosition="1" position="790,225" size="16,16" transparent="1" alphatest="blend" />
   <widget name="spinner_2" zPosition="1" position="806,225" size="16,16" transparent="1" alphatest="blend" />

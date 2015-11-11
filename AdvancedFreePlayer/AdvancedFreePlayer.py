@@ -1140,7 +1140,6 @@ class AdvancedFreePlayerStarter(Screen):
       
     def StartPlayer(self):
         self.lastOPLIsetting = None
-        self.lastDMNAPIsetting = None
         
         if not path.exists(self.opensubtitle) and not self.opensubtitle.startswith("http://"):
             self.opensubtitle = ""
@@ -1149,40 +1148,26 @@ class AdvancedFreePlayerStarter(Screen):
                 try: 
                     self.lastOPLIsetting = config.subtitles.pango_autoturnon.value
                     config.subtitles.pango_autoturnon.value = True
-                except: pass
-                if self.DmnapiInstalled == True:
-                    try:
-                        self.lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
-                        config.plugins.dmnapi.autosrton.value = True
-                        printDEBUG("DMNapi subtitles enabled")
-                    except: pass
-                self.session.openWithCallback(self.EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
+                except:
+                    pass
+                self.session.openWithCallback(self.ExitPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
                 return
             else:
                 try: 
                     self.lastOPLIsetting = config.subtitles.pango_autoturnon.value
                     config.subtitles.pango_autoturnon.value = False
                     printDEBUG("OpenPLI subtitles disabled")
-                except: printDEBUG("pango_autoturnon non existent, is it VTI?")
-                if self.DmnapiInstalled == True:
-                    try:
-                        self.lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
-                        config.plugins.dmnapi.autosrton.value = False
-                        printDEBUG("DMNapi subtitles disabled")
-                    except: pass
-                self.session.openWithCallback(self.EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
+                except:
+                    printDEBUG("pango_autoturnon non existent, is it VTI?")
+
+                self.session.openWithCallback(self.ExitPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService,self.URLlinkName,self.movieTitle)
                 return
         else:
             printDEBUG("StartPlayer>>> File %s does not exist :(" % self.openmovie)
      
-    def EndPlayer(self):
+    def ExitPlayer(self):
         if self.lastOPLIsetting is not None:
             config.subtitles.pango_autoturnon.valu = self.lastOPLIsetting
-        if self.lastDMNAPIsetting is not None:
-            config.plugins.dmnapi.autosrton.value = self.lastDMNAPIsetting
-        self.ExitPlayer()
-
-    def ExitPlayer(self):
         myConfig.PlayerOn.value = False
         self.close()
 ##################################################################### CLASS END #####################################################################
@@ -1291,13 +1276,10 @@ class AdvancedFreePlayerStart(Screen):
       
     def StartPlayer(self):
         lastOPLIsetting = None
-        lastDMNAPIsetting = None
         
         def EndPlayer():
             if lastOPLIsetting is not None:
                 config.subtitles.pango_autoturnon.valu = lastOPLIsetting
-            if lastDMNAPIsetting is not None:
-                config.plugins.dmnapi.autosrton.value = lastDMNAPIsetting
             self["filelist"].refresh()
 
         if not path.exists(self.opensubtitle) and not self.opensubtitle.startswith("http://"):
@@ -1307,13 +1289,8 @@ class AdvancedFreePlayerStart(Screen):
                 try: 
                     lastOPLIsetting = config.subtitles.pango_autoturnon.value
                     config.subtitles.pango_autoturnon.value = True
-                except: pass
-                if self.DmnapiInstalled == True:
-                    try:
-                        lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
-                        config.plugins.dmnapi.autosrton.value = True
-                        printDEBUG("DMNapi subtitles enabled")
-                    except: pass
+                except:
+                    pass
                 self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,'',self.rootID,self.LastPlayedService,self.URLlinkName)
                 return
             else:
@@ -1321,13 +1298,8 @@ class AdvancedFreePlayerStart(Screen):
                     lastOPLIsetting = config.subtitles.pango_autoturnon.value
                     config.subtitles.pango_autoturnon.value = False
                     printDEBUG("OpenPLI subtitles disabled")
-                except: printDEBUG("pango_autoturnon non existent, is it VTI?")
-                if self.DmnapiInstalled == True:
-                    try:
-                        lastDMNAPIsetting = config.plugins.dmnapi.autosrton.value
-                        config.plugins.dmnapi.autosrton.value = False
-                        printDEBUG("DMNapi subtitles disabled")
-                    except: pass
+                except:
+                    printDEBUG("pango_autoturnon non existent, is it VTI?")
                 self.session.openWithCallback(EndPlayer,AdvancedFreePlayer,self.openmovie,self.opensubtitle,self.rootID,self.LastPlayedService,self.URLlinkName)
                 return
         else:

@@ -7,7 +7,7 @@ PluginName = 'freeIPTV'
 PluginGroup = 'Extensions'
 
 ##### System Imports
-from os import path as os_path, environ as os_environ, listdir as os_listdir
+from os import path as os_path, environ as os_environ, listdir as os_listdir, chmod as os_chmod, remove as os_remove
 import traceback
 
 ###### openPLI imports
@@ -47,8 +47,7 @@ def printDEBUG( myText , myFUNC = ''):
         except:
             pass
 
-def printDBG( myText , myFUNC = ''):
-    printDEBUG(myText , myFUNC)
+printDBG=printDEBUG
 
 def printExc(msg=''):
     printDBG("=================== EXCEPTION >>>")
