@@ -1,0 +1,8 @@
+<screen position="0,0" size="132,64" title="AFP">
+	<widget source="session.CurrentService" render="Label" position="0,0" size="6,30" font="Regular;22" halign="center" valign="center" >
+		<convert type="ServicePosition">Position</convert>
+    </widget>
+    <widget source="session.CurrentService" render="Label" position="6,0" size="6,30" font="Regular;22" valign="center" halign="center" >
+        <convert type="ServicePosition">Remaining</convert> 
+    </widget>
+</screen>

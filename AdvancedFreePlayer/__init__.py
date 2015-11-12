@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-PluginInfo='@j00zek 11/11/2015'
+PluginInfo='@j00zek 12/11/2015'
 
 #permanent
 PluginName = 'AdvancedFreePlayer'
@@ -48,3 +48,24 @@ printDBG=printDEBUG
 
 def ClearMemory(): #avoid GS running os.* (e.g. os.system) on tuners with small RAM
     with open("/proc/sys/vm/drop_caches", "w") as f: f.write("1\n")
+    
+##################################################### LOAD SKIN DEFINITION #####################################################
+def LoadSkin(SkinName):
+    printDEBUG("LoadSkin >>> %s" % SkinName)
+    from enigma import getDesktop
+    
+    if SkinName.endswith('.xml'):
+        SkinName=SkinName[:-4]
+    skinDef=None
+    
+    if getDesktop(0).size().width() == 1920 and os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName+'FHD')):
+        with open("%sskins/%s.xml" % (PluginPath,SkinName+'FHD'),'r') as skinfile:
+            skinDef=skinfile.read()
+            skinfile.close()
+    elif os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName)):
+        with open("%sskins/%s.xml" % (PluginPath,SkinName),'r') as skinfile:
+            skinDef=skinfile.read()
+            skinfile.close()
+    else:
+        printDEBUG("%s does not exists")
+    return skinDef

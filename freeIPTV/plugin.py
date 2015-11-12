@@ -24,7 +24,7 @@ def Plugins(**kwargs):
     desc = _("free IPTV services browser for everyone!")
     list = [PluginDescriptor(name="freeIPTV", description=desc, where = [PluginDescriptor.WHERE_PLUGINMENU], icon=iconFile, fnc=main)] # always show in plugin menu
     list.append(PluginDescriptor(name="freeIPTV", description=desc, where = PluginDescriptor.WHERE_MENU, fnc=startIPTVfromMenu))
-    if config.plugins.iptvplayer.showinextensions.value:
+    if myConfig.showinextensions.value:
         list.append (PluginDescriptor(name="freeIPTV", description=desc, where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=main))
     return list
 
@@ -37,7 +37,7 @@ def Plugins(**kwargs):
 def startIPTVfromMenu(menuid, **kwargs):
     if menuid == "system":
         return [(_("Configure freeIPTV"), mainSetup, "iptv_config", None)]
-    elif menuid == "mainmenu" and config.plugins.iptvplayer.showinMainMenu.value == True:
+    elif menuid == "mainmenu" and myConfig.showinMainMenu.value == True:
         return [("freeIPTV", main, "iptv_main", None)]
     else:
         return []

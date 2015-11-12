@@ -100,14 +100,6 @@ ok - infobar\n\
 audio - change audio track\n\
 ")
 
-def LoadSkin(SkinName):
-    skinDef=None
-    if path.exists("%sskins/%s.xml" % (PluginPath,SkinName)):
-        with open("%sskins/%s.xml" % (PluginPath,SkinName),'r') as skinfile:
-            skinDef=skinfile.read()
-            skinfile.close()
-    return skinDef
-
 class AdvancedFreePlayerInfobar(Screen):
     skin = LoadSkin('AdvancedFreePlayerInfobar')
     def __init__(self,session, isPause = False):
@@ -1083,6 +1075,9 @@ class AdvancedFreePlayer(Screen):
     def MoveSubsDown(self):
         self.updateSubtitlePosition(+5)
 
+    def createSummary(self):
+        return AdvancedFreePlayerLCD
+
 ##################################################################### CLASS END #####################################################################
 class AdvancedFreePlayerStarter(Screen):
 
@@ -1546,8 +1541,16 @@ class AdvancedFreePlayerStart(Screen):
     def dmnapiCallback(self, answer=False):
         self["filelist"].refresh()
         
-##################################################################### CLASS ENDS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    def createSummary(self):
+        return AdvancedFreePlayerStartLCD
+##################################################################### LCD Screens <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+class AdvancedFreePlayerLCD(Screen): 
+    skin = LoadSkin('AdvancedFreePlayerLCD')
+ 
+class AdvancedFreePlayerStartLCD(Screen):
+    skin = LoadSkin('AdvancedFreePlayerStartLCD')
                 
+##################################################################### CLASS ENDS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 def getNameWithoutExtension(MovieNameWithExtension):
     extLenght = len(path.splitext( path.basename(MovieNameWithExtension) )[1])
     return MovieNameWithExtension[: -extLenght]
@@ -1574,3 +1577,5 @@ def resetMoviePlayState(cutsFileName):
         f.close()
     except:
         pass
+
+        
