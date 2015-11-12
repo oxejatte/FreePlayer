@@ -83,19 +83,23 @@ except:
 
 ##################################################### LOAD SKIN DEFINITION #####################################################
 def LoadSkin(SkinName):
+    printDEBUG("LoadSkin >>> %s" % SkinName)
     from enigma import getDesktop
     
     if SkinName.endswith('.xml'):
         SkinName=SkinName[:-4]
     skinDef=None
     
-    if getDesktop(0).size().width() == 1920:
-        SkinName +='FHD'
-        
-    if os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName)):
+    if getDesktop(0).size().width() == 1920 and os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName+'FHD')):
+        with open("%sskins/%s.xml" % (PluginPath,SkinName+'FHD'),'r') as skinfile:
+            skinDef=skinfile.read()
+            skinfile.close()
+    elif os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName)):
         with open("%sskins/%s.xml" % (PluginPath,SkinName),'r') as skinfile:
             skinDef=skinfile.read()
             skinfile.close()
+    else:
+        printDEBUG("%s does not exists")
     return skinDef
 
 ##################################################### CREATE LIST of HOSTS #####################################################
