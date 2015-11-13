@@ -166,7 +166,8 @@ class AdvancedFreePlayer(Screen):
         self.openmovie = openmovie
         
         if movieTitle == '':
-            self.movieTitle = self.openmovie
+            self.movieTitle = getNameWithoutExtension(path.basename(self.openmovie))
+            #printDEBUG(self.movieTitle)
         else:
             self.movieTitle = movieTitle
             
