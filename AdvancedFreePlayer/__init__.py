@@ -55,7 +55,7 @@ def LoadSkin(SkinName):
     from enigma import getDesktop
     model=''
     if os_path.exists("/proc/stb/info/vumodel"):
-        with open("/proc/stb/info/vumodel", "w") as f:
+        with open("/proc/stb/info/vumodel", "r") as f:
             model=f.read().strip()
             f.close()
     
