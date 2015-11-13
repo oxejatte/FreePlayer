@@ -88,11 +88,6 @@ if [ -f /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/$version ]
   exit 0
 fi
 
-if ! `grep -q 'config.plugins.AdvancedFreePlayer.freeIPTVintegration' < /etc/enigma2/settings`;then
-  echo "_(freeIPTV integration disabled)"
-  rm -rf /tmp/$version/freeIPTV
-fi
-
 echo "_(Installing new version...)"
 if [ ! -e /DuckboxDisk ]; then
   rm -rf /usr/lib/enigma2/python/Plugins/Extensions/AdvancedFreePlayer/j00zek-FreePlayer-* 2>/dev/null
