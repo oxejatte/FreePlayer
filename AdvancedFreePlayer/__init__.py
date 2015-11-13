@@ -53,13 +53,27 @@ def ClearMemory(): #avoid GS running os.* (e.g. os.system) on tuners with small 
 def LoadSkin(SkinName):
     printDEBUG("LoadSkin >>> %s" % SkinName)
     from enigma import getDesktop
+    model=''
+    if os_path.exists("/proc/stb/info/vumodel"):
+        with open("/proc/stb/info/vumodel", "w") as f:
+            model=f.read().strip()
+            f.close()
     
     if SkinName.endswith('.xml'):
         SkinName=SkinName[:-4]
     skinDef=None
     
-    if getDesktop(0).size().width() == 1920 and os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName+'FHD')):
-        with open("%sskins/%s.xml" % (PluginPath,SkinName+'FHD'),'r') as skinfile:
+    if getDesktop(0).size().width() == 1920 and os_path.exists("%sskins/%s%sFHD.xml" % (PluginPath,SkinName,model)):
+        with open("%sskins/%s%sFHD.xml" % (PluginPath,SkinName,model),'r') as skinfile:
+            skinDef=skinfile.read()
+            skinfile.close()
+    elif getDesktop(0).size().width() == 1920 and os_path.exists("%sskins/%sFHD.xml" % (PluginPath,SkinName)):
+        with open("%sskins/%sFHD.xml" % (PluginPath,SkinName),'r') as skinfile:
+            skinDef=skinfile.read()
+            skinfile.close()
+            
+    elif os_path.exists("%sskins/%s%s.xml" % (PluginPath,SkinName,model)):
+        with open("%sskins/%s%s.xml" % (PluginPath,SkinName,model),'r') as skinfile:
             skinDef=skinfile.read()
             skinfile.close()
     elif os_path.exists("%sskins/%s.xml" % (PluginPath,SkinName)):
