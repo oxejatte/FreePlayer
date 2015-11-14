@@ -18,7 +18,7 @@
     <widget source="session.RecordState" render="Pixmap" pixmap="vfd_icons/rec.png" position="54,0" size="12,7">
       <convert type="ConditionalShowHide" />
     </widget>
-    <widget source="session.CurrentService" render="Progress" position="2,28" size="130,4" borderWidth="1">
+    <widget source="session.CurrentService" render="Label" position="0,0" size="132,1">
       <convert type="ServicePosition">Summary</convert>
-    </widget>
+    </widget>  
 </screen>
