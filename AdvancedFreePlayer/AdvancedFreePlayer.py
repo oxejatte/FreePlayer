@@ -142,6 +142,9 @@ class AdvancedFreePlayerInfobar(Screen):
     def CloseInfobar(self):
         self.close()
 
+    def createSummary(self):
+        return AdvancedFreePlayerLCD
+
 class AdvancedFreePlayer(Screen):
     CUT_TYPE_IN = 0
     CUT_TYPE_OUT = 1

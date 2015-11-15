@@ -1,24 +1,5 @@
 <screen name="AdvancedFreePlayerLCD" position="0,0" size="132,32" title="AFP">
-    <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/teletext.png" position="5,0" size="8,7">
-      <convert type="ServiceInfo">HasTelext</convert>
-      <convert type="ConditionalShowHide" />
-    </widget>
-    <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/crypt.png" position="15,0" size="8,7">
-      <convert type="ServiceInfo">IsCrypted</convert>
-      <convert type="ConditionalShowHide" />
-    </widget>
-    <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/dolby.png" position="25,0" size="10,7">
-      <convert type="ServiceInfo">IsMultichannel</convert>
-      <convert type="ConditionalShowHide" />
-    </widget>
-    <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/format.png" position="37,0" size="15,7">
-      <convert type="ServiceInfo">IsWidescreen</convert>
-      <convert type="ConditionalShowHide" />
-    </widget>
-    <widget source="session.RecordState" render="Pixmap" pixmap="vfd_icons/rec.png" position="54,0" size="12,7">
-      <convert type="ConditionalShowHide" />
-    </widget>
-    <widget source="session.CurrentService" render="Label" position="0,0" size="132,1">
-      <convert type="ServicePosition">Summary</convert>
+    <widget source="session.CurrentService" render="Label" position="60,0" size="132,1">
+      <convert type="ServicePosition">Remaining</convert>
     </widget>  
 </screen>
