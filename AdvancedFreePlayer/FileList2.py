@@ -175,7 +175,8 @@ class FileList(MenuList):
                 except:
                     files = []
                 if self.sortDate:
-                    files.sort(key=lambda s: os_path.getmtime(os_path.join(directory, s)))
+                    try: files.sort(key=lambda s: os_path.getmtime(os_path.join(directory, s)))
+                    except: print "Exception sorting by date!!!"
                     files.reverse()
                 else:
                     files.sort()
