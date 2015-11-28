@@ -3,7 +3,7 @@
     <convert type="ServiceName">Name</convert>
   </widget>
 
-  <widget source="session.CurrentService" render="Progress" pixmap="BlackHarmony/gfx/progress_lcd.png" position="15,265" size="270,20" borderWidth="2">
+  <widget source="session.CurrentService" render="Progress" position="15,265" size="270,20" borderWidth="2">
     <convert type="ServicePosition">Position</convert>
   </widget>
 <widget source="global.CurrentTime" render="Label" position="288,235" size="180,70" font="VFD;70" halign="right">
