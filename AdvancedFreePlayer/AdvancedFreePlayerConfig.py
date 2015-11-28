@@ -69,6 +69,11 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         self.list.append(getConfigListEntry(_("SRT subtitles displayed by:"), config.plugins.AdvancedFreePlayer.SRTplayer))
         
         self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry(_("--- Cover & Descriptions settings ---"), config.plugins.AdvancedFreePlayer.separator))
+        self.list.append(getConfigListEntry("Download Covers during start:", config.plugins.AdvancedFreePlayer.AutoDownloadCoversDescriptions))
+        self.list.append(getConfigListEntry("Searching path:", config.plugins.AdvancedFreePlayer.MovieSearchTree))
+
+        self.list.append(getConfigListEntry("", config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("--- Advanced settings ---"), config.plugins.AdvancedFreePlayer.separator))
         self.list.append(getConfigListEntry(_("Download:"), config.plugins.AdvancedFreePlayer.Version)) #debug|public
         self.list.append(getConfigListEntry(_("MultiFramework selection (sh4 only):"), config.plugins.AdvancedFreePlayer.MultiFramework))
@@ -85,10 +90,10 @@ class AdvancedFreePlayerConfig(Screen, ConfigListScreen):
         def goUpdate(ret):
             if ret is True:
                 runlist = []
-                runlist.append( ('chmod 755 %sUpdate*.sh' % PluginPath) )
-                runlist.append( ('cp -a %sUpdatePlugin.sh /tmp/AFPUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
+                runlist.append( ('chmod 755 %s/scripts/Update*.sh' % PluginPath) )
+                runlist.append( ('cp -a %s/scripts/UpdatePlugin.sh /tmp/AFPUpdate.sh' % PluginPath) ) #to have clear path of updating this script too ;)
                 runlist.append( ('/tmp/AFPUpdate.sh %s "%s"' % (config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
-                runlist.append( ('%sUpdateDMnapi.sh %s "%s"' % (PluginPath,config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
+                runlist.append( ('%s/scripts/UpdateDMnapi.sh %s "%s"' % (PluginPath,config.plugins.AdvancedFreePlayer.Version.value,PluginInfo)) )
                 self.session.openWithCallback(doNothing, AdvancedFreePlayerConsole, title = _("Updating plugin"), cmdlist = runlist)
                 return
         self.session.openWithCallback(goUpdate, MessageBox,_("Do you want to update plugin?"),  type = MessageBox.TYPE_YESNO, timeout = 10, default = False)
@@ -131,7 +136,7 @@ def __(txt):
                 break
 
     return txt
-
+########################################################################################################################################
 class AdvancedFreePlayerConsole(Screen):
     #TODO move this to skin.xml
     skin = """
