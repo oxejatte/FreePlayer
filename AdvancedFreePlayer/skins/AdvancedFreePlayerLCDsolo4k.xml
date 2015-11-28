@@ -1,0 +1,36 @@
+<screen name="AdvancedFreePlayerInfobarSummary" position="0,0" size="480,320" id="1">
+  <widget source="session.CurrentService" render="Label" position="15,60" size="450,170" font="VFD;40" halign="center" valign="center">
+    <convert type="ServiceName">Name</convert>
+  </widget>
+
+  <widget source="session.CurrentService" render="Progress" pixmap="BlackHarmony/gfx/progress_lcd.png" position="15,265" size="270,20" borderWidth="2">
+    <convert type="ServicePosition">Position</convert>
+  </widget>
+<widget source="global.CurrentTime" render="Label" position="288,235" size="180,70" font="VFD;70" halign="right">
+  <convert type="ClockToText">Format:%H:%M</convert>
+</widget>
+
+  <widget source="session.RecordState" render="FixedLabel" position="20,15" zPosition="3" size="55,42" text=" ">
+    <convert type="ConfigEntryTest">config.usage.blinking_rec_symbol_during_recording,True,CheckSourceBoolean</convert>
+    <convert type="ConditionalShowHide">Blink</convert>
+  </widget>
+  <widget source="session.RecordState" render="Pixmap" pixmap="vfd_icons/REC_red.png" position="20,15" size="55,42" alphatest="blend">
+    <convert type="ConditionalShowHide" />
+  </widget>
+  <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/CRYPT_grey.png" position="75,15" size="55,42" alphatest="blend">
+    <convert type="ServiceInfo">IsCrypted</convert>
+    <convert type="ConditionalShowHide" />
+  </widget>
+  <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/TELETEXT_yellow.png" position="130,15" size="55,42" alphatest="blend">
+    <convert type="ServiceInfo">HasTelext</convert>
+    <convert type="ConditionalShowHide" />
+  </widget>
+  <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/16x9_blue.png" position="185,15" size="55,42" alphatest="blend">
+    <convert type="ServiceInfo">IsWidescreen</convert>
+    <convert type="ConditionalShowHide" />
+  </widget>
+  <widget source="session.CurrentService" render="Pixmap" pixmap="vfd_icons/DOLBY_green.png" position="240,15" size="55,42" alphatest="blend">
+    <convert type="ServiceInfo">IsMultichannel</convert>
+    <convert type="ConditionalShowHide" />
+  </widget>
+</screen>
