@@ -670,34 +670,34 @@ class AdvancedFreePlayer(Screen):
                         o.seek(-1,1)
                         break
                 while True:
-                    nr = o.readline().replace("\r\n","\n")
-                    #printDEBUG(nr)
+                    nr = o.readline().replace('\00','').replace("\r\n","\n")
                     if len(nr) == 0:break
                     if nr == "\n": continue
                     nr = nr.strip()
-                    tim = o.readline().replace("\r\n","\n")
+                    #printDEBUG('"%s"' % nr)
+                    tim = o.readline().replace('\00','').replace("\r\n","\n")
                     if len(tim) == 0:break
                     tim = tim.strip()
                     #printDEBUG(tim)
-                    l1 = o.readline().replace("\r\n","\n")
+                    l1 = o.readline().replace('\00','').replace("\r\n","\n")
                     if len(l1) == 0:break
                     l1 = l1.strip()
-                    l2 = o.readline().replace("\r\n","\n")
+                    l2 = o.readline().replace('\00','').replace("\r\n","\n")
                     if len(l2) == 0:break
                     if not l2 == "\n":
                         l2 = l2.strip()
                         l = l1 + "\n" + l2
-                        l3 = o.readline().replace("\r\n","\n")
+                        l3 = o.readline().replace('\00','').replace("\r\n","\n")
                         if len(l3) == 0:break
                         if not l3 == "\n":
                             l3 = l3.strip()
                             l = l1 + "\n " + l2 + "\n" + l3
-                            l4 = o.readline().replace("\r\n","\n")
+                            l4 = o.readline().replace('\00','').replace("\r\n","\n")
                             if len(l4) == 0:break
                             if not l4 == "\n":
                                 l4 = l4.strip()
                                 l = l1 + "\n " + l2 + "\n" + l3 + "\n" + l4
-                                n = o.readline().replace("\r\n","\n")
+                                n = o.readline().replace('\00','').replace("\r\n","\n")
                                 if len(n) == 0:break
                     else:
                         l = l1
@@ -719,7 +719,8 @@ class AdvancedFreePlayer(Screen):
                 o.close()
         except Exception as e:
             self.subtitle = []
-            printDEBUG("Error loadsrt %s at subtitle %d ('%s' > '%s'" % (str(e),int(nr),tim1,tim2) )
+            try: printDEBUG("Error loadsrt %s at subtitle %d ('%s' > '%s'" % (str(e),int(nr),tim1,tim2) )
+            except: printDEBUG("Error loadsrt %s at subtitle str'%s' ('%s' > '%s')" % (str(e),str(nr),str(tim1),str(tim2)) )
             try:
                 o.close()
             except:
