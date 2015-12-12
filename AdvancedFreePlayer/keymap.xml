@@ -19,7 +19,8 @@
     <key id="KEY_RED" mapto="togglePause" flags="m" />
     <key id="KEY_PLAY" mapto="togglePause" flags="m" />
     <key id="KEY_PAUSE" mapto="togglePause" flags="m" />
-    
+    <key id="KEY_PLAYPAUSE" mapto="togglePause" flags="m" />
+
     <key id="KEY_1" mapto="BackF30s" flags="m" />
 			<!--key id="KEY_2" mapto="key2" flags="m" /-->
     <key id="KEY_3" mapto="FastF30s" flags="m" />
