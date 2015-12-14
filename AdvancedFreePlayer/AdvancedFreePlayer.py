@@ -271,25 +271,31 @@ class AdvancedFreePlayer(Screen):
         if not self.ENABLE_RESUME_SUPPORT:
             printDEBUG("resumeLastPlayback ENABLE_RESUME_SUPPORT=false")
             return
+        self.ResumeTimer = eTimer()
+        self.ResumeTimer.callback.append(self.resumeLastPlaybackNext)
+        self.ResumeTimer.start(1000, True) # singleshot
 
+    def resumeLastPlaybackNext(self):
         cue = self.__getCuesheet()
         if cue is None:
-            #printDEBUG("resumeLastPlayback cue=None")
+            printDEBUG("resumeLastPlayback no cue")
             return
         cut_list = cue.getCutList()
-        print cut_list
 
         last = None
         for (pts, what) in cut_list:
             if what == self.CUT_TYPE_LAST:
                 last = pts
+                printDEBUG("resumeLastPlayback: last position found")
                 break
-            if last is None:
-                return
+        if last is None:
+            printDEBUG("resumeLastPlayback: last position does not exist")
+            return
         
         # only resume if at least 10 seconds ahead, or <10 seconds before the end.
         seekable = self.__getSeekable()
         if seekable is None:
+            printDEBUG("resumeLastPlayback: not seekable")
             return  # Should not happen?
         length = seekable.getLength() or (None, 0)
         printDEBUG("resumeLastPlayback: seekable.getLength() returns: %d" % length[1])

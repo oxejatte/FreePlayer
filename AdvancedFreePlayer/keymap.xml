@@ -73,6 +73,7 @@
     <key id="KEY_RED" mapto="CloseAndTogglePause" flags="m" />
     <key id="KEY_PLAY" mapto="CloseAndTogglePause" flags="m" />
     <key id="KEY_PAUSE" mapto="CloseAndTogglePause" flags="m" />
+    <key id="KEY_PLAYPAUSE" mapto="CloseAndTogglePause" flags="m" />
   </map>
   
   <map context="AdvancedFreePlayerPauseInfobar">
