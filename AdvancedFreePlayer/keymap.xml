@@ -83,5 +83,6 @@
     <key id="KEY_RED" mapto="unPause" flags="m" />
     <key id="KEY_PLAY" mapto="unPause" flags="m" />
     <key id="KEY_PAUSE" mapto="unPause" flags="m" />
+    <key id="KEY_PLAYPAUSE" mapto="unPause" flags="m" />
   </map>
 </keymap>
